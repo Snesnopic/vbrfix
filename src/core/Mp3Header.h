@@ -21,10 +21,11 @@
 
 #ifndef MP3HEADER_H
 #define MP3HEADER_H
+#include <cstdint>
 
 class Mp3Header
 {
-	typedef unsigned long _ul32;
+	using _ul32 = uint32_t;
 	
 	public:
 		enum MpegVersion { MPEG_VERSION_RESERVED, MPEG_VERSION_1, MPEG_VERSION_2, MPEG_VERSION_2_5};

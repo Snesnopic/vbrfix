@@ -22,24 +22,25 @@
 #ifndef BITREADER_H
 #define BITREADER_H
 
+#include <cstdint>
+
 class IndexMask
 {
-	private:
-		typedef unsigned long _ul32;
-		static _ul32 MakeMask(const _ul32 iIndex, const _ul32 iBits = 1)
+	using _ul32 = uint32_t;
+	static _ul32 MakeMask(const _ul32 iIndex, const _ul32 iBits = 1)
+	{
+		_ul32 mask = 0;
+		for(unsigned int i = 0; i < iBits; ++i)
 		{
-			_ul32 mask = 0;
-			for(unsigned int i = 0; i < iBits; ++i)
-			{
-				if(i > 0) mask = (mask << 1);
-				mask |= 1;
-			}
-			mask = (mask << iIndex);
-			return mask;
+			if(i > 0) mask = (mask << 1);
+			mask |= 1;
 		}
+		mask = (mask << iIndex);
+		return mask;
+	}
 
 	public:
-		IndexMask(const _ul32 iIndex, const _ul32 iBits = 1)
+		explicit IndexMask(const _ul32 iIndex, const _ul32 iBits = 1)
 			: m_mask(MakeMask(iIndex, iBits))
 			, m_maskShift(iIndex)
 		{
@@ -58,12 +59,12 @@ class IndexMask
 		{
 			return ((bits & m_mask) == m_mask);
 		}
-		void SetIndex(_ul32 &bits, int iIndex) const
+		void SetIndex(_ul32 &bits, const int iIndex) const
 		{
 			bits &= (~m_mask); // remove current value
 			bits |= (m_mask & (iIndex << m_maskShift));
 		}
-		void SetOn(_ul32 &bits, bool bValue) const
+		void SetOn(_ul32 &bits, const bool bValue) const
 		{
 			SetIndex(bits, bValue ? 1 : 0);
 		}

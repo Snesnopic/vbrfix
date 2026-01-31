@@ -24,6 +24,7 @@
 
 #include "Mp3Frame.h"
 #include <memory>
+#include <cstdint>
 #include <vector>
 #include <list>
 
@@ -61,7 +62,7 @@ class XingFrame : public Mp3Frame
 		XingFrame(unsigned long iOldFilePos, const Mp3Header & header);
 
 	private:
-		typedef unsigned long _ul32;
+		using _ul32 = uint32_t;
 		std::vector<unsigned char> m_Toc;
 		_ul32 m_Flags;
 		_ul32 m_FrameCount;
