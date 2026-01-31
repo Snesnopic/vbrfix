@@ -28,11 +28,11 @@ class UnknownDataObject : public Mp3Object
 {
 	public:
 		UnknownDataObject(unsigned long oldFilePosition, unsigned long size);
-		virtual ~UnknownDataObject();
+		~UnknownDataObject() override;
 
-		virtual unsigned long size() const;
+		[[nodiscard]] unsigned long size() const override;
 
-		virtual Mp3ObjectType GetObjectType() const {return Mp3ObjectType(Mp3ObjectType::UNKNOWN_DATA);}
+		[[nodiscard]] Mp3ObjectType GetObjectType() const override {return Mp3ObjectType(Mp3ObjectType::UNKNOWN_DATA);}
 	private:
 		unsigned long m_Size;
 

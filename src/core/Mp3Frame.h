@@ -32,26 +32,23 @@ class Mp3Frame : public Mp3Object
 {
 	public:
 		
-		Mp3Frame(const Mp3Header &header);
-		virtual ~Mp3Frame();
+		explicit Mp3Frame(const Mp3Header &header);
+		~Mp3Frame() override;
 
 		static Mp3Frame* Check(CheckParameters & rParams);
 
-		virtual unsigned long size() const;
+		[[nodiscard]] unsigned long size() const override;
 
-		virtual Mp3ObjectType GetObjectType() const {return Mp3ObjectType(Mp3ObjectType::FRAME);}
+		[[nodiscard]] Mp3ObjectType GetObjectType() const override {return Mp3ObjectType(Mp3ObjectType::FRAME);}
 
-		const Mp3Header& GetMp3Header() const;
+		[[nodiscard]] const Mp3Header& GetMp3Header() const;
 		Mp3Header& GetMp3Header();
 
-		virtual bool HasLameInfo() const {return false;} // this could change if we handle the info tag
+		[[nodiscard]] virtual bool HasLameInfo() const {return false;} // this could change if we handle the info tag
 		
 	protected:
 		Mp3Frame(unsigned long oldFilePosition, const Mp3Header &header);
 		Mp3Header m_Header;
-	private:
-		Mp3Frame(const Mp3Frame& rOther);
-		void operator = (const Mp3Frame& rOther);
 
 };
 

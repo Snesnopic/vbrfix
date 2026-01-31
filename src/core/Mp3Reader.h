@@ -42,12 +42,12 @@ class Mp3Reader
 		
 			public:
 				ReadProgressDetails();
-				int GetPercentUnderstood() const;
-				unsigned long GetFrameCount() const;
-				int GetAverageBitrate() const;
-				bool IsVbr() const;
+				[[nodiscard]] int GetPercentUnderstood() const;
+				[[nodiscard]] unsigned long GetFrameCount() const;
+				[[nodiscard]] int GetAverageBitrate() const;
+				[[nodiscard]] bool IsVbr() const;
 
-				const Mp3ObjectType::Set& GetFoundObjectTypes() const;
+				[[nodiscard]] const Mp3ObjectType::Set& GetFoundObjectTypes() const;
 
 				void foundObject(const Mp3Object * object);
 				void setPercentOfRead(int i) {m_iPercentOfRead = i;}
@@ -71,7 +71,7 @@ class Mp3Reader
 
 		bool ReadMp3();
 
-		const ConstMp3ObjectList& GetMp3Objects() const;
+		[[nodiscard]] const ConstMp3ObjectList& GetMp3Objects() const;
 		
 	private:
 		typedef std::vector<Mp3ObjectCheckerInterface*> ObjectCheckerList;

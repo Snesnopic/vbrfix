@@ -25,10 +25,11 @@
 #include <iterator>
 #include <cmath>
 #include <cassert>
+#include <utility>
 
-FileBuffer::FileBuffer(const std::string& fileName)
+FileBuffer::FileBuffer(std::string  fileName)
 	: m_Stream(new std::ifstream)
- 	, m_FileName(fileName)
+ 	, m_FileName(std::move(fileName))
 {
 	m_Stream->open(m_FileName.c_str(), std::ios::in | std::ios::binary);
 	if(!m_Stream->is_open())
@@ -57,7 +58,7 @@ unsigned char FileBuffer::operator [ ]( off_type i ) const
 	{
 		const int size = i - iCurrentBufferSize + 1;
 		unsigned char* buffer = new unsigned char[size];
-		ArrayDeleter<unsigned char> cleanUpArray(buffer); // will delete the array when it goes out of scope
+		ArrayDeleter cleanUpArray(buffer); // will delete the array when it goes out of scope
 		m_Stream->read(reinterpret_cast<char*>(buffer), size);
 		m_InternalBuffer.insert(m_InternalBuffer.end(), buffer, buffer + size);
 		if(m_Stream->fail()) 
@@ -66,8 +67,7 @@ unsigned char FileBuffer::operator [ ]( off_type i ) const
 	return m_InternalBuffer[i];
 }
 
-bool FileBuffer::proceed( off_type i )
-{
+bool FileBuffer::proceed(const off_type i ) const {
 	const pos_type iCurrentBufferSize = m_InternalBuffer.size();
 	if(i < iCurrentBufferSize)
 	{ 
@@ -92,44 +92,41 @@ bool FileBuffer::isDataLeft( ) const
 	return (!m_InternalBuffer.empty() || (!m_Stream->eof() && (m_Stream->tellg() < m_Length)));
 }
 
-bool FileBuffer::setPosition( pos_type iPos )
-{
+bool FileBuffer::setPosition(const pos_type &iPos ) const {
 	m_Stream->seekg(iPos, std::ios_base::beg);
 	m_InternalBuffer.clear();
 	return true;
 }
 
-bool FileBuffer::readIntoBuffer( unsigned char * pBuffer, off_type iSize )
-{
+bool FileBuffer::readIntoBuffer( unsigned char * pBuffer, const off_type iSize ) const {
 	assert(pBuffer);
 	m_Stream->read(reinterpret_cast<char*>(pBuffer), iSize);
 	return true;
 }
 
-void FileBuffer::reopen( )
-{
+void FileBuffer::reopen( ) const {
 	m_Stream->close();
 	m_Stream->open(m_FileName.c_str(), std::ios::in | std::ios::binary);
 }
 
-bool FileBuffer::CanRead( off_type iCount ) const
+bool FileBuffer::CanRead(const off_type iCount ) const
 {
 	return (m_Length >= (position() + iCount));
 }
 
-bool FileBuffer::DoesSay(const std::string& text, off_type iStartingfromByte) const
+bool FileBuffer::DoesSay(const std::string& sText, const off_type iStartingfromByte) const
 {
-	assert(!text.empty());
-	if(!CanRead(iStartingfromByte + text.size()))
+	assert(!sText.empty());
+	if(!CanRead(iStartingfromByte + sText.size()))
 		return false;
-	for(off_type i = 0; i < text.size(); ++i)
+	for(off_type i = 0; i < sText.size(); ++i)
 	{
-		if(text[i] != (*this)[i + iStartingfromByte]) return false;
+		if(sText[i] != (*this)[i + iStartingfromByte]) return false;
 	}
 	return true;
 }
 
-void FileBuffer::getData(std::vector<unsigned char>& dest, off_type iStartingfromByte) const
+void FileBuffer::getData(std::vector<unsigned char>& dest, const off_type iStartingfromByte) const
 {
 	for(off_type i = 0; i < dest.size(); ++i)
 	{
@@ -137,7 +134,7 @@ void FileBuffer::getData(std::vector<unsigned char>& dest, off_type iStartingfro
 	}
 }
 
-unsigned long FileBuffer::GetFromBigEndianToNative( off_type iStartingfromByte ) const
+unsigned long FileBuffer::GetFromBigEndianToNative(const off_type iStartingfromByte ) const
 {
 	unsigned char buffer[4];
 	for(off_type i = 0; i < sizeof(buffer); ++i)
@@ -147,7 +144,7 @@ unsigned long FileBuffer::GetFromBigEndianToNative( off_type iStartingfromByte )
 	return EndianHelper::ConvertToNativeFromBigEndian(buffer);
 }
 
-unsigned long FileBuffer::GetFromLitleEndianToNative( off_type iStartingfromByte ) const
+unsigned long FileBuffer::GetFromLitleEndianToNative(const off_type iStartingfromByte ) const
 {
 	unsigned char buffer[4];
 	for(off_type i = 0; i < sizeof(buffer); ++i)

@@ -27,11 +27,9 @@ ReadSettings::ReadSettings()
 }
 
 
-ReadSettings::~ReadSettings()
-{
-}
+ReadSettings::~ReadSettings() = default;
 
-void ReadSettings::setTreatFreeFormatFramesAsUnknownData(bool bSet)
+void ReadSettings::setTreatFreeFormatFramesAsUnknownData(const bool bSet)
 {
 	m_bTreatFreeFormatFramesAsUnknownData = bSet;
 }

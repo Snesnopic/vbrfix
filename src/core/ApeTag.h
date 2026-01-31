@@ -27,11 +27,11 @@
 class ApeTag : public Mp3Object
 {
 	public:
-		virtual ~ApeTag();
-		static ApeTag* Check(CheckParameters & rParams);
+		~ApeTag() override;
+		static ApeTag* Check(const CheckParameters & rParams);
 
-		virtual unsigned long size() const;
-		virtual Mp3ObjectType GetObjectType() const {return Mp3ObjectType(Mp3ObjectType::APE_TAG);}
+		[[nodiscard]] unsigned long size() const override;
+		[[nodiscard]] Mp3ObjectType GetObjectType() const override {return Mp3ObjectType(Mp3ObjectType::APE_TAG);}
 	protected:
 		ApeTag(unsigned long oldFilePosition, unsigned long Size);
 

@@ -34,24 +34,25 @@ class XingFrame : public Mp3Frame
 	typedef std::list<const Mp3Object*> Mp3ObjectList;
 	
 	public:
-		XingFrame(const Mp3Header & header);
+		explicit XingFrame(const Mp3Header & header);
 
-		void Setup(const Mp3ObjectList & finalObjectList, const XingFrame* pOriginalFrame, const FixerSettings &rFixerSettings, FileBuffer & mp3FileBuffer);
+		void Setup(const Mp3ObjectList &finalObjectList, const XingFrame *pOriginalFrame, const FixerSettings &rFixerSettings, const
+		           FileBuffer &mp3FileBuffer);
 		bool isOriginalCorrect(const XingFrame* originalFrame);
 
-		virtual void writeToFile(FileBuffer & originalFile, std::ofstream & rOutFile) const;
+		void writeToFile(FileBuffer & originalFile, std::ofstream & rOutFile) const override;
 
-		virtual Mp3ObjectType GetObjectType() const {return Mp3ObjectType(Mp3ObjectType::XING_FRAME);}
+		[[nodiscard]] Mp3ObjectType GetObjectType() const override {return Mp3ObjectType(Mp3ObjectType::XING_FRAME);}
 
 		static XingFrame * Check(CheckParameters & rParams);
 
-		virtual bool HasLameInfo() const;
+		[[nodiscard]] bool HasLameInfo() const override;
 
-		int GetQuality() const {return m_VbrScale;}
+		[[nodiscard]] int GetQuality() const {return m_VbrScale;}
 		void SetQuality(int quality);
 
 		void SetLameData(const std::vector<unsigned char> &lameData);
-		const std::vector<unsigned char>& GetLameData() const;
+		[[nodiscard]] const std::vector<unsigned char>& GetLameData() const;
 
 		static bool IsCrcUpdateSupported(const Mp3Header & header);
 		

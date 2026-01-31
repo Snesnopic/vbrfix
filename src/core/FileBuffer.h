@@ -34,8 +34,9 @@ class FileBuffer
 	public:
 		typedef std::istream::pos_type pos_type;
 		typedef std::istream::off_type off_type;
-		
-		FileBuffer(const std::string &fileName);
+
+		explicit FileBuffer(std::string fileName);
+
 		virtual ~FileBuffer();
 
 		unsigned char operator [] (off_type i) const;
@@ -47,16 +48,16 @@ class FileBuffer
 
 		bool CanRead(off_type iCount) const;
 
-		bool proceed(off_type i);
+		bool proceed(off_type i) const;
 
-		bool setPosition(pos_type iPos);
-		bool readIntoBuffer(unsigned char * pBuffer, off_type iSize);
+		bool setPosition(const pos_type &iPos) const;
+		bool readIntoBuffer(unsigned char * pBuffer, off_type iSize) const;
 
 		bool DoesSay(const std::string& sText, off_type iStartingfromByte = 0) const;
 
 		bool isDataLeft() const;
 
-		void reopen();
+		void reopen() const;
 
 		pos_type position() const;
 

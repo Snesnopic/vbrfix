@@ -27,13 +27,13 @@
 class VbriFrame : public Mp3Frame
 {
 	public:
-		VbriFrame(const Mp3Header & header);
+		explicit VbriFrame(const Mp3Header & header);
 		
-		virtual Mp3ObjectType GetObjectType() const {return Mp3ObjectType(Mp3ObjectType::VBRI_FRAME);}
+		[[nodiscard]] Mp3ObjectType GetObjectType() const override {return Mp3ObjectType(Mp3ObjectType::VBRI_FRAME);}
 		
 		static VbriFrame * Check(CheckParameters & rParams);
 		
-		virtual ~VbriFrame();
+		~VbriFrame() override;
 	protected:
 		VbriFrame(unsigned long oldFilePosition, const Mp3Header &header);
 };

@@ -84,11 +84,6 @@ Mp3ObjectType::Mp3ObjectType( ObjectId type )
 {
 }
 
-/*Mp3ObjectType::Mp3ObjectType( const Mp3ObjectType & rOther )
-	: m_Type(rOther.m_Type)
-{
-}*/
-
 bool Mp3ObjectType::IsTypeOfFrame( ) const
 {
 	return (m_Type == FRAME || m_Type == XING_FRAME || m_Type == VBRI_FRAME);

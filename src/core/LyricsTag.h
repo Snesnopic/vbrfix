@@ -27,11 +27,11 @@
 class Lyrics3Tag : public Mp3Object
 {
 	public:
-		virtual ~Lyrics3Tag();
-		static Lyrics3Tag* Check(CheckParameters & rParams);
+		~Lyrics3Tag() override;
+		static Lyrics3Tag* Check(const CheckParameters & rParams);
 
-		virtual unsigned long size() const;
-		virtual Mp3ObjectType GetObjectType() const {return Mp3ObjectType(Mp3ObjectType::LYRICS_TAG);}
+		[[nodiscard]] unsigned long size() const override;
+		[[nodiscard]] Mp3ObjectType GetObjectType() const override {return Mp3ObjectType(Mp3ObjectType::LYRICS_TAG);}
 	protected:
 		Lyrics3Tag(unsigned long oldFilePosition, unsigned long Size);
 

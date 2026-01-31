@@ -24,17 +24,15 @@
 #include "FeedBackInterface.h"
 #include <sstream>
 
-Id3v1Tag::Id3v1Tag(unsigned long oldFilePosition)
+Id3v1Tag::Id3v1Tag(const unsigned long oldFilePosition)
 	: Mp3Object(oldFilePosition)
 {
 }
 
 
-Id3v1Tag::~Id3v1Tag()
-{
-}
+Id3v1Tag::~Id3v1Tag() = default;
 
-Id3v1Tag * Id3v1Tag::Check(CheckParameters & rParams)
+Id3v1Tag * Id3v1Tag::Check(const CheckParameters& rParams)
 {
 	const FileBuffer& mp3FileBuffer(rParams.m_mp3FileBuffer);
 	
@@ -49,16 +47,13 @@ Id3v1Tag * Id3v1Tag::Check(CheckParameters & rParams)
 				rParams.m_feedBack.addLogMessage(Log::LOG_INFO, "Found Id3v1 Tag");
 				return new Id3v1Tag(mp3FileBuffer.position());
 			}
-			else
-			{
-				rParams.m_feedBack.addLogMessage(Log::LOG_WARNING, "Found an Id3v1 Tag over the end of the file, treating as unknown data");
-			}
+			rParams.m_feedBack.addLogMessage(Log::LOG_WARNING, "Found an Id3v1 Tag over the end of the file, treating as unknown data");
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
-Id3v2Tag * Id3v2Tag::Check(CheckParameters & rParams)
+Id3v2Tag * Id3v2Tag::Check(const CheckParameters& rParams)
 {
 	const FileBuffer& mp3FileBuffer(rParams.m_mp3FileBuffer);
 	
@@ -102,22 +97,17 @@ Id3v2Tag * Id3v2Tag::Check(CheckParameters & rParams)
 						rParams.m_feedBack.addLogMessage(Log::LOG_INFO, "Found Id3v2 Tag");
 						return new Id3v2Tag(mp3FileBuffer.position(), id3Size);
 					}
-					else
-					{
-						rParams.m_feedBack.addLogMessage(Log::LOG_WARNING, "Found an Id3v2 Tag over the end of the file, treating as unknown data");
-					}
+					rParams.m_feedBack.addLogMessage(Log::LOG_WARNING, "Found an Id3v2 Tag over the end of the file, treating as unknown data");
 				}
 			}
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
-Id3v2Tag::~ Id3v2Tag( )
-{
-}
+Id3v2Tag::~Id3v2Tag() = default;
 
-Id3v2Tag::Id3v2Tag( unsigned long oldFilePosition, unsigned long Size )
+Id3v2Tag::Id3v2Tag(const unsigned long oldFilePosition, const unsigned long Size )
 	: Mp3Object(oldFilePosition)
 	, m_Size(Size)
 {

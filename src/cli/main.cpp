@@ -21,12 +21,12 @@
 
 #include "ConsoleFixer.h"
 
-int main(const int iCount, const char ** pArgs)
+int main(const int argc, const char** argv)
 {
 	ConsoleFixer::CommandList args;
-	for(int i = 0; i < iCount; ++i)
+	for(int i = 0; i < argc; ++i)
 	{
-		args.push_back(std::string(pArgs[i]));
+		args.emplace_back(argv[i]);
 	}
 	ConsoleFixer app(args);
 	app.Run();

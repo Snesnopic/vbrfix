@@ -35,44 +35,44 @@ class FixerSettings : public ReadSettings
 {
 	public:
 		FixerSettings();
-		virtual ~FixerSettings() {}
+		~FixerSettings() override = default;
 
-		bool RemoveType(Mp3ObjectType eType) const;
+		[[nodiscard]] bool RemoveType(Mp3ObjectType eType) const;
 		void SetRemoveType(Mp3ObjectType eType, bool bMarkForRemoval);
-		const Mp3ObjectType::Set & GetRemovingDataTypes() const;
+		[[nodiscard]] const Mp3ObjectType::Set & GetRemovingDataTypes() const;
 
-		bool AlwaysSkip() const;
+		[[nodiscard]] bool AlwaysSkip() const;
 		void SetAlwaysSkip(bool bAlwaysSkip);
 
 		enum LameOption { LAME_REMOVE, LAME_KEEP, LAME_KEEP_CALC_TAG_CRC, LAME_KEEP_CALC_BOTH_CRCS };
 
-		LameOption LameInfoOption() const {return m_LameInfoOption;}
-		void SetLameInfoOption(LameOption lameInfo) {m_LameInfoOption = lameInfo;}
+		[[nodiscard]] LameOption LameInfoOption() const {return m_LameInfoOption;}
+		void SetLameInfoOption(const LameOption lameInfo) {m_LameInfoOption = lameInfo;}
 
-		bool KeepLameInfo() const {return m_LameInfoOption != LAME_REMOVE;}
+		[[nodiscard]] bool KeepLameInfo() const {return m_LameInfoOption != LAME_REMOVE;}
 
-		int MinimumPercentUnderStood() const;
+		[[nodiscard]] int MinimumPercentUnderStood() const;
 		void SetMinimumPercentUnderStood(int iMinPercentUnderStood);
 
-		bool loggingDetail() const {return m_bLogDetail;}
+		[[nodiscard]] bool loggingDetail() const {return m_bLogDetail;}
 		void setLoggingDetail(bool value) {m_bLogDetail = value;}
 
-		bool recalculateLameTagHeaderCrc() const {return (m_LameInfoOption == LAME_KEEP_CALC_TAG_CRC) || (m_LameInfoOption == LAME_KEEP_CALC_BOTH_CRCS);}
-		bool recalculateLameTagHeaderCrcMusic() const {return m_LameInfoOption == LAME_KEEP_CALC_BOTH_CRCS;}
+		[[nodiscard]] bool recalculateLameTagHeaderCrc() const {return (m_LameInfoOption == LAME_KEEP_CALC_TAG_CRC) || (m_LameInfoOption == LAME_KEEP_CALC_BOTH_CRCS);}
+		[[nodiscard]] bool recalculateLameTagHeaderCrcMusic() const {return m_LameInfoOption == LAME_KEEP_CALC_BOTH_CRCS;}
 
 		void Defaults();
 
-		bool skippingNonVbr() const { return m_bSkipNonVbr;}
-		void setSkippingNonVbr(bool bSkip) { m_bSkipNonVbr = bSkip;}
+		[[nodiscard]] bool skippingNonVbr() const { return m_bSkipNonVbr;}
+		void setSkippingNonVbr(const bool bSkip) { m_bSkipNonVbr = bSkip;}
 		enum XingFrameCrcOption { CRC_REMOVE, CRC_KEEP_IF_CAN, CRC_KEEP};
-		XingFrameCrcOption GetXingFrameCrcOption() const {return m_XingFrameCrcOption;}
-		void setXingFrameCrcOption(XingFrameCrcOption e) {m_XingFrameCrcOption = e;}
+		[[nodiscard]] XingFrameCrcOption GetXingFrameCrcOption() const {return m_XingFrameCrcOption;}
+		void setXingFrameCrcOption(const XingFrameCrcOption e) {m_XingFrameCrcOption = e;}
 
-		bool skipIfXingTagLooksGood() const { return m_bSkipIfXingTagLooksGood;}
-		void setSkipIfXingTagLooksGood(bool bSkip) { m_bSkipIfXingTagLooksGood = bSkip;}
+		[[nodiscard]] bool skipIfXingTagLooksGood() const { return m_bSkipIfXingTagLooksGood;}
+		void setSkipIfXingTagLooksGood(const bool bSkip) { m_bSkipIfXingTagLooksGood = bSkip;}
 
-		bool removeInconsistentFrames() const { return m_bRemoveInconsistentFrames;}
-		void setRemoveInconsistentFrames(bool b){ m_bRemoveInconsistentFrames = b;}
+		[[nodiscard]] bool removeInconsistentFrames() const { return m_bRemoveInconsistentFrames;}
+		void setRemoveInconsistentFrames(const bool b){ m_bRemoveInconsistentFrames = b;}
 		
 	protected:
 		Mp3ObjectType::Set m_RemoveTypes;

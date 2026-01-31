@@ -56,10 +56,9 @@ namespace EndianHelper
 		file << static_cast<unsigned char>((uData & 0x000000FF));
 	}
 
-	unsigned long ConvertToNativeFromBigEndian(unsigned char* pBuffer )
+	unsigned long ConvertToNativeFromBigEndian(const unsigned char* pBuffer )
 	{
-		unsigned long uResult;
-		uResult = pBuffer[0];
+		unsigned long uResult = pBuffer[0];
 		uResult <<= 8;
 		uResult |= pBuffer[1];
 		uResult <<= 8;
@@ -69,10 +68,9 @@ namespace EndianHelper
 		return uResult;
 	}
 	
-	unsigned long ConvertToNativeFromLittleEndian( unsigned char * pBuffer )
+	unsigned long ConvertToNativeFromLittleEndian( const unsigned char * pBuffer )
 	{
-		unsigned long uResult;
-		uResult = pBuffer[3];
+		unsigned long uResult = pBuffer[3];
 		uResult <<= 8;
 		uResult |= pBuffer[2];
 		uResult <<= 8;
@@ -82,7 +80,7 @@ namespace EndianHelper
 		return uResult;
 	}
 
-	std::vector< unsigned char > ConvertToBigEndianBytes( unsigned long uData )
+	std::vector< unsigned char > ConvertToBigEndianBytes(const unsigned long uData )
 	{
 		std::vector<unsigned char> bytes(4);
 		bytes[0] = static_cast<unsigned char>(((uData & 0xFF000000) >> 24));

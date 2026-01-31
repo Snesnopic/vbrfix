@@ -36,15 +36,15 @@ class ConsoleFixer : public FeedBackInterface
 		typedef std::list< std::string > CommandList;
 		ConsoleFixer(const CommandList& args);
 
-		virtual ~ConsoleFixer();
+		~ConsoleFixer() override;
 
 		bool Run();
 
-		virtual void update() {}
+		void update() override {}
 
-		virtual void addLogMessage(const Log::LogItem sMsg);
+		void addLogMessage(Log::LogItem sMsg) override;
 
-		virtual bool HasUserCancelled() const {return false;}
+		[[nodiscard]] bool HasUserCancelled() const override {return false;}
 	private:
 		const CommandList& m_Args;
 

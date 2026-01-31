@@ -28,6 +28,7 @@
 #include "FixerSettings.h"
 #include "XingFrame.h"
 #include <fstream>
+#include <memory>
 #include <sstream>
 #include <cassert>
 #include <algorithm>
@@ -37,18 +38,16 @@ namespace
 {
 	class IsOfMp3ObjectType
 	{
-		private:
-			const Mp3ObjectType::Set& m_Types;
+		const Mp3ObjectType::Set& m_Types;
 			Mp3ObjectType::Set m_IntTypes;
 		public:
-			bool operator () (const Mp3Object *pObject)
-			{
+			bool operator () (const Mp3Object *pObject) const {
 				return (m_Types.find(pObject->GetObjectType()) != m_Types.end());
 			}
-			IsOfMp3ObjectType(const Mp3ObjectType::Set& types)
+			explicit IsOfMp3ObjectType(const Mp3ObjectType::Set& types)
 				: m_Types(types) {}
 				
-			IsOfMp3ObjectType(const Mp3ObjectType::ObjectId type)
+			explicit IsOfMp3ObjectType(const Mp3ObjectType::ObjectId type)
 				: m_Types(m_IntTypes)
 			{
 				m_IntTypes.insert(type);
@@ -58,12 +57,11 @@ namespace
 	class FindLameInfoFrame
 	{
 		public:
-			bool operator () (const Mp3Object *pObject)
-			{
+			bool operator () (const Mp3Object *pObject) const {
 				if(pObject->GetObjectType().IsTypeOfFrame())
 				{
 					assert(dynamic_cast<const Mp3Frame*>(pObject));
-					if(static_cast<const Mp3Frame*>(pObject)->HasLameInfo())
+					if(dynamic_cast<const Mp3Frame*>(pObject)->HasLameInfo())
 					{
 						return true;
 					}
@@ -80,9 +78,7 @@ VbrFixer::VbrFixer( FeedBackInterface & rFeedBackInterface, const FixerSettings 
 }
 
 
-VbrFixer::~VbrFixer()
-{
-}
+VbrFixer::~VbrFixer() = default;
 
 struct ConsistencyChecker
 {
@@ -93,17 +89,17 @@ struct ConsistencyChecker
 	{
 		threshold = objects.size() / 100;
 		readMode = true;
-		for(Mp3Reader::ConstMp3ObjectList::iterator iter = objects.begin(); iter != objects.end(); ++iter)
-			(*this)(*iter);
+		for(const auto & object : objects)
+			(*this)(object);
 		
 		std::stringstream headersText; headersText << "Found MP3 headers: ";
 		int maxCount = 0;
-		for(std::map<Mp3Header, int>::const_iterator headerI = headers.begin(); headerI != headers.end(); ++headerI)
+		for(auto & header : headers)
 		{
-			int count = headerI->second;
-			headersText << std::dec <<"[x" << count << "]0x" << std::hex << std::uppercase << headerI->first.GetHeader() << " ";
+			int count = header.second;
+			headersText << std::dec <<"[x" << count << "]0x" << std::hex << std::uppercase << header.first.GetHeader() << " ";
 			maxCount = std::max(count, maxCount);
-			if(maxCount == count) mostPopularFrameHeader = headerI->first;
+			if(maxCount == count) mostPopularFrameHeader = header.first;
 		}
 		feedBack.addLogMessage(Log::LOG_DETAIL, headersText.str());
 		if(layers.size() > 1)
@@ -131,7 +127,7 @@ struct ConsistencyChecker
 	{
 		if(obj->GetObjectType().IsTypeOfFrame())
 		{
-			Mp3Header header = static_cast<const Mp3Frame&>(*obj).GetMp3Header();
+			const Mp3Header header = dynamic_cast<const Mp3Frame&>(*obj).GetMp3Header();
 			if(readMode)
 			{
 				headers[header]++;
@@ -231,9 +227,9 @@ void VbrFixer::Fix( const std::string & sInFileName, const std::string & sOutFil
 		std::unique_ptr<XingFrame> xingFrame;
 		if(m_ProgressDetails.IsVbr())
 		{
-			Mp3Reader::ConstMp3ObjectList::iterator firstFrame = std::find_if(Mp3Objects.begin(), Mp3Objects.end(), IsOfMp3ObjectType(Mp3ObjectType::GetFrameTypes()));
+			auto firstFrame = std::find_if(Mp3Objects.begin(), Mp3Objects.end(), IsOfMp3ObjectType(Mp3ObjectType::GetFrameTypes()));
 			assert(firstFrame != Mp3Objects.end()); // as it is vbr there must be a first frame
-			xingFrame.reset(new XingFrame(consistencyChecker.mostPopularFrameHeader));
+			xingFrame = std::make_unique<XingFrame>(consistencyChecker.mostPopularFrameHeader);
 			Mp3Objects.insert(firstFrame, xingFrame.get());
 		}
 	
@@ -255,23 +251,23 @@ void VbrFixer::Fix( const std::string & sInFileName, const std::string & sOutFil
 	
 		// Fill the Xing Frame once we know the file positions will not change again
 		// This must occur dicectly before writing the Mp3
-		if(xingFrame.get())
+		if(xingFrame)
 		{
-			const XingFrame * pOriginalFrame = NULL;
+			const XingFrame * pOriginalFrame = nullptr;
 			if(m_rFixerSettings.KeepLameInfo())
 			{
-				Mp3Reader::ConstMp3ObjectList::const_iterator lameFrameIter = std::find_if(OriginalMp3Objects.begin(), OriginalMp3Objects.end(), FindLameInfoFrame());
+				auto lameFrameIter = std::find_if(OriginalMp3Objects.begin(), OriginalMp3Objects.end(), FindLameInfoFrame());
 				if(lameFrameIter != OriginalMp3Objects.end())
 				{
-					pOriginalFrame = static_cast<const XingFrame* >(*lameFrameIter);
+					pOriginalFrame = dynamic_cast<const XingFrame* >(*lameFrameIter);
 				}
 			}
 			if(!pOriginalFrame)
 			{
-				Mp3Reader::ConstMp3ObjectList::const_iterator xingFrameIter = std::find_if(OriginalMp3Objects.begin(), OriginalMp3Objects.end(), IsOfMp3ObjectType(Mp3ObjectType::XING_FRAME));
+				auto xingFrameIter = std::find_if(OriginalMp3Objects.begin(), OriginalMp3Objects.end(), IsOfMp3ObjectType(Mp3ObjectType::XING_FRAME));
 				if(xingFrameIter != OriginalMp3Objects.end())
 				{
-					pOriginalFrame = static_cast<const XingFrame* >(*xingFrameIter);
+					pOriginalFrame = dynamic_cast<const XingFrame* >(*xingFrameIter);
 				}
 			}
 			
@@ -293,14 +289,14 @@ void VbrFixer::Fix( const std::string & sInFileName, const std::string & sOutFil
 		unsigned long iFileSizeTotal = 0;
 		unsigned long iStreamSize = 0;
 		int iObjectsWritten = 0; const int iTotalObjects = Mp3Objects.size();
-		for(Mp3Reader::ConstMp3ObjectList::const_iterator iter = Mp3Objects.begin(); iter != Mp3Objects.end(); ++iter)
+		for(auto & Mp3Object : Mp3Objects)
 		{
-			(*iter)->writeToFile(inFile, outFile);
-			iFileSizeTotal += (*iter)->size();
+			Mp3Object->writeToFile(inFile, outFile);
+			iFileSizeTotal += Mp3Object->size();
 
-			if((*iter)->GetObjectType().IsTypeOfFrame())
+			if(Mp3Object->GetObjectType().IsTypeOfFrame())
 			{
-				iStreamSize += (*iter)->size(); // also count size of stream
+				iStreamSize += Mp3Object->size(); // also count size of stream
 			}
 			
 			if(m_rFeedBackInterface.HasUserCancelled())
@@ -334,7 +330,7 @@ void VbrFixer::Fix( const std::string & sInFileName, const std::string & sOutFil
 		m_ProgressDetails.SetState(FixState::ERROR);
 		m_rFeedBackInterface.addLogMessage( Log::LOG_ERROR, pMsg);
 	}
-	catch(std::string s)
+	catch(std::string& s)
 	{
 		m_ProgressDetails.SetState(FixState::ERROR);
 		m_rFeedBackInterface.addLogMessage( Log::LOG_ERROR, s);

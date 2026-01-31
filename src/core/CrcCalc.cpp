@@ -49,12 +49,10 @@ namespace
 			}
 			tab[crc_i] = crc_crc;
 		}
-		
-		return;
 	}
 }
 
-int CrcHelper::CRC_update_lookup(int value, int crc)
+int CrcHelper::CRC_update_lookup(const int value, int crc)
 {
 	static Crc16Tab tab;
 	if(tab.empty())
@@ -68,15 +66,14 @@ int CrcHelper::CRC_update_lookup(int value, int crc)
 
 int CrcHelper::CrcMp3FrameUpdate(int value, int crc)
 {
-	const int CRC16_POLYNOMIAL = 0x8005;
 	value <<= 8;
 	for (int i = 0; i < 8; i++)
 	{
 		value <<= 1;
 		crc <<= 1;
 
-		if (((crc ^ value) & 0x10000))
-		{
+		if (((crc ^ value) & 0x10000)) {
+			constexpr int CRC16_POLYNOMIAL = 0x8005;
 			crc ^= CRC16_POLYNOMIAL;
 		}
 	}

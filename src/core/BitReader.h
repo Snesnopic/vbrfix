@@ -46,15 +46,15 @@ class IndexMask
 		}
 		const _ul32 m_mask;
 		const _ul32 m_maskShift;
-		_ul32 GetIndex(const _ul32 bits) const
+		[[nodiscard]] _ul32 GetIndex(const _ul32 bits) const
 		{
 			return ((bits & m_mask) >> m_maskShift);
 		}
-		bool IsOn(const _ul32 bits) const
+		[[nodiscard]] bool IsOn(const _ul32 bits) const
 		{
 			return ((bits & m_mask) != 0);
 		}
-		bool areAllOn(const _ul32 bits) const
+		[[nodiscard]] bool areAllOn(const _ul32 bits) const
 		{
 			return ((bits & m_mask) == m_mask);
 		}

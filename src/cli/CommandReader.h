@@ -35,8 +35,8 @@ class CommandReader
 
 		virtual ~CommandReader();
 
-		const OptionList& GetOptionList() const {return m_Options;}
-		const ParameterList& GetParameterList() const {return m_Parameters;}
+		[[nodiscard]] const OptionList& GetOptionList() const {return m_Options;}
+		[[nodiscard]] const ParameterList& GetParameterList() const {return m_Parameters;}
 
 	private:
 		ParameterList m_Parameters;

@@ -46,9 +46,9 @@ class Mp3ObjectType
 		Mp3ObjectType(ObjectId type);
 		//Mp3ObjectType(const Mp3ObjectType &rOther);
 	
-		bool IsTypeOfFrame() const;
-		bool IsTypeOfTag() const;
-		bool IsUnknown() const;
+		[[nodiscard]] bool IsTypeOfFrame() const;
+		[[nodiscard]] bool IsTypeOfTag() const;
+		[[nodiscard]] bool IsUnknown() const;
 
 		[[nodiscard]] ObjectId GetObjectId() const {return m_Type;}
 	

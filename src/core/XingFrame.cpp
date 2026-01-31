@@ -34,19 +34,19 @@
 
 namespace
 {
-	const unsigned long FRAMES_FLAG = 0x0001;
-	const unsigned long BYTES_FLAG = 0x0002;
-	const unsigned long TOC_FLAG = 0x0004;
-	const unsigned long VBR_SCALE_FLAG = 0x0008;
+	constexpr unsigned long FRAMES_FLAG = 0x0001;
+	constexpr unsigned long BYTES_FLAG = 0x0002;
+	constexpr unsigned long TOC_FLAG = 0x0004;
+	constexpr unsigned long VBR_SCALE_FLAG = 0x0008;
 
-	const unsigned int HEADER_BYTES = 4;
-	const int INVALID_XING_OFFSET = -1;
+	constexpr unsigned int HEADER_BYTES = 4;
+	constexpr int INVALID_XING_OFFSET = -1;
 	
-	const int maxLameBodySize = 208;
-	const int lameHeadSize = 20;
+	constexpr int maxLameBodySize = 208;
+	constexpr int lameHeadSize = 20;
 
-	const unsigned int TOC_SIZE = 100;
-	const int XING_DATA_SIZE = HEADER_BYTES + HEADER_BYTES + TOC_SIZE + HEADER_BYTES + HEADER_BYTES + HEADER_BYTES;
+	constexpr unsigned int TOC_SIZE = 100;
+	constexpr int XING_DATA_SIZE = HEADER_BYTES + HEADER_BYTES + TOC_SIZE + HEADER_BYTES + HEADER_BYTES + HEADER_BYTES;
 
 	const std::string XingIdentifier = "Xing";
 
@@ -55,7 +55,7 @@ namespace
 		return ((std::max(a, b) - std::min(a, b)) < 3);
 	}
 
-	int GetXingHeaderOffset(Mp3Header header)
+	int GetXingHeaderOffset(const Mp3Header& header)
 	{
 		if(header.IsValid())
 		{
@@ -64,11 +64,9 @@ namespace
 			{
 				case Mp3Header::MPEG_VERSION_1:
 					return (bMono ? (17 + 4) : (32 + 4));
-					break;
 				case Mp3Header::MPEG_VERSION_2:
 				case Mp3Header::MPEG_VERSION_2_5:
 					return (bMono ? (9 + 4) : (17 + 4));
-					break;
 				case Mp3Header::MPEG_VERSION_RESERVED:
 					break;
 			}
@@ -88,7 +86,7 @@ namespace
 	unsigned long GetLameInfoPosition(int iXingHeaderPos, unsigned long uXingFlags)
 	{
 		assert(iXingHeaderPos > 0);
-		unsigned long iPos = iXingHeaderPos;
+		const unsigned long iPos = iXingHeaderPos;
 		return iPos + GetXingDataSize(uXingFlags);
 	}
 
@@ -237,7 +235,7 @@ XingFrame::XingFrame(const Mp3Header & header)
 	assert(header.IsValid());
 }
 
-void XingFrame::Setup(const Mp3ObjectList & finalObjectList, const XingFrame* pOriginalFrame, const FixerSettings &rFixerSettings, FileBuffer & mp3FileBuffer)
+void XingFrame::Setup(const Mp3ObjectList & finalObjectList, const XingFrame* pOriginalFrame, const FixerSettings &rFixerSettings, const FileBuffer & mp3FileBuffer)
 {
 	// Xing Flags
 	m_Flags = FRAMES_FLAG | BYTES_FLAG | TOC_FLAG;
@@ -263,7 +261,7 @@ void XingFrame::Setup(const Mp3ObjectList & finalObjectList, const XingFrame* pO
 					int crc = 0;
 					FileBuffer::pos_type oldPos = mp3FileBuffer.position(); // TODO this isn't ideal, some sort of iterator would be good
 					// calculate music CRC
-					for(Mp3ObjectList::const_iterator iter = finalObjectList.begin(); iter != finalObjectList.end(); ++iter)
+					for(auto iter = finalObjectList.begin(); iter != finalObjectList.end(); ++iter)
 					{
 						if(((*iter)->GetObjectType().GetObjectId() != Mp3ObjectType::XING_FRAME) && (*iter)->GetObjectType().IsTypeOfFrame() )
 						{
@@ -273,7 +271,7 @@ void XingFrame::Setup(const Mp3ObjectList & finalObjectList, const XingFrame* pO
 								
 							for(unsigned long iByte = 0; iByte < (*iter)->size(); ++iByte)
 							{
-								int val = mp3FileBuffer[iByte];
+								const int val = mp3FileBuffer[iByte];
 								crc = CrcHelper::CRC_update_lookup(val, crc);
 							}
 						}
@@ -441,7 +439,7 @@ XingFrame * XingFrame::Check(CheckParameters & rParams)
 		
 		return pNewFrame;
 	}
-	return NULL;
+	return nullptr;
 }
 
 XingFrame::XingFrame( unsigned long iOldFilePos, const Mp3Header & header)

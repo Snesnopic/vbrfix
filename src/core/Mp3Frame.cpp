@@ -45,32 +45,23 @@ Mp3Frame * Mp3Frame::Check(CheckParameters & rParams)
 				{
 					throw "Frame uses free bitrate, not supported";
 				}
-				else
-				{
-					return NULL;
-				}
+				return nullptr;
 			}
-			else
+			if(rParams.m_mp3FileBuffer.CanRead( testMp3Header.GetFrameSize()))
 			{
-				if(rParams.m_mp3FileBuffer.CanRead( testMp3Header.GetFrameSize()))
+				// what type of frame is it
+				Mp3Frame * pFrame = XingFrame::Check(rParams);
+				if(!pFrame) pFrame = VbriFrame::Check(rParams);
+				if(!pFrame)
 				{
-					// what type of frame is it
-					Mp3Frame * pFrame = XingFrame::Check(rParams);
-					if(!pFrame) pFrame = VbriFrame::Check(rParams);
-					if(!pFrame)
-					{
-						pFrame = new Mp3Frame(rParams.m_mp3FileBuffer.position(), testMp3Header);
-					}
-					return pFrame;
+					pFrame = new Mp3Frame(rParams.m_mp3FileBuffer.position(), testMp3Header);
 				}
-				else
-				{
-					rParams.m_feedBack.addLogMessage( Log::LOG_WARNING, "A Frame Runs off the end of the file, treating as unknown data");
-				}
+				return pFrame;
 			}
+			rParams.m_feedBack.addLogMessage( Log::LOG_WARNING, "A Frame Runs off the end of the file, treating as unknown data");
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 Mp3Frame::Mp3Frame(unsigned long oldFilePosition, const Mp3Header &header)
@@ -80,15 +71,12 @@ Mp3Frame::Mp3Frame(unsigned long oldFilePosition, const Mp3Header &header)
 }
 
 Mp3Frame::Mp3Frame( const Mp3Header & header )
-	: Mp3Object()
-	, m_Header(header)
+	: m_Header(header)
 {
 }
 
 
-Mp3Frame::~Mp3Frame()
-{
-}
+Mp3Frame::~Mp3Frame() = default;
 
 unsigned long Mp3Frame::size( ) const
 {

@@ -21,16 +21,14 @@
 
 #include "UnknownDataObject.h"
 
-UnknownDataObject::UnknownDataObject(unsigned long oldFilePosition, unsigned long size)
+UnknownDataObject::UnknownDataObject(const unsigned long oldFilePosition, const unsigned long size)
 	: Mp3Object(oldFilePosition)
 	, m_Size(size)
 {
 }
 
 
-UnknownDataObject::~UnknownDataObject()
-{
-}
+UnknownDataObject::~UnknownDataObject() = default;
 
 
 unsigned long UnknownDataObject::size( ) const

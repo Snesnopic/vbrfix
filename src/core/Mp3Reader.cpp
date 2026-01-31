@@ -103,7 +103,7 @@ bool Mp3Reader::ReadMp3( )
 	m_rProgessDetails.setFileSize( FileSize);
 	while(m_rMp3FileBuffer.isDataLeft() && !m_rFeedBack.HasUserCancelled())
 	{
-		Mp3Object *pFoundObject = NULL;
+		Mp3Object *pFoundObject = nullptr;
 		for(ObjectCheckerList::const_iterator iter = m_ObjectCheckers.begin(); iter != m_ObjectCheckers.end(); ++iter)
 		{
 			// can we identify the object at the position in the filebuffer

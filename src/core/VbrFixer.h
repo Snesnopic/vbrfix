@@ -39,8 +39,8 @@ class VbrFixer
 		{
 			public:
 				ProgressDetails();
-				int GetTotalPercent() const;
-				FixState::State GetState() const;
+				[[nodiscard]] int GetTotalPercent() const;
+				[[nodiscard]] FixState::State GetState() const;
 				void SetState(FixState::State eState);
 
 				void setPercentOfProcessing(int iPer){m_iPercentOfProcessing = iPer;}
@@ -56,7 +56,7 @@ class VbrFixer
 
 		void Fix(const std::string &sInFileName, const std::string &sOutFileName);
 
-		const ProgressDetails & GetProgressDetails() const {return m_ProgressDetails;}
+		[[nodiscard]] const ProgressDetails & GetProgressDetails() const {return m_ProgressDetails;}
 		
 		static std::string GetFixerVersion();
 
@@ -66,7 +66,7 @@ class VbrFixer
 
 		ProgressDetails m_ProgressDetails;
 
-		bool ShouldSkipMp3(const Mp3Reader::ConstMp3ObjectList &frames) const;
+		[[nodiscard]] bool ShouldSkipMp3(const Mp3Reader::ConstMp3ObjectList &frames) const;
 };
 
 #endif

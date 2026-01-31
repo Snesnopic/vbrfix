@@ -34,9 +34,7 @@ VbriFrame::VbriFrame(unsigned long oldFilePosition, const Mp3Header &header)
 {
 }
 
-VbriFrame::~VbriFrame()
-{
-}
+VbriFrame::~VbriFrame() = default;
 
 VbriFrame * VbriFrame::Check(CheckParameters & rParams)
 {
@@ -45,13 +43,13 @@ VbriFrame * VbriFrame::Check(CheckParameters & rParams)
 	// must be called from Mp3Frame::Check() or the Mp3Header might not have been verified and things like that
 	
 	// TODO Should this be the same as GetXingHeaderOffset
-	const unsigned int vbritagPosition = 32 + 4;
+	constexpr unsigned int vbritagPosition = 32 + 4;
 	if(mp3FileBuffer.DoesSay("VBRI", vbritagPosition))
 	{
-		Mp3Header header(mp3FileBuffer.GetFromBigEndianToNative());
+		const Mp3Header header(mp3FileBuffer.GetFromBigEndianToNative());
 		return new VbriFrame(mp3FileBuffer.position(), header);
 	}
-	return NULL;
+	return nullptr;
 }
 
 

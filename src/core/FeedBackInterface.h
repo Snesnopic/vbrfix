@@ -24,6 +24,7 @@
 
 #include "Mp3FileObject.h"
 #include <string>
+#include <utility>
 
 namespace Log
 {
@@ -31,11 +32,11 @@ namespace Log
 	class LogItem
 	{
 		public:
-			std::string GetText() const {return m_Text;}
-			Importance GetImportance() const {return m_Importance;}
+			[[nodiscard]] std::string GetText() const {return m_Text;}
+			[[nodiscard]] Importance GetImportance() const {return m_Importance;}
 			LogItem() {}
-			LogItem(Importance imporance, std::string sText)
-				: m_Text(sText) , m_Importance(imporance){}
+			LogItem(const Importance importance, std::string sText)
+				: m_Text(std::move(sText)) , m_Importance(importance){}
 		private:
 			std::string m_Text;
 			Importance m_Importance;
@@ -45,19 +46,19 @@ namespace Log
 class FeedBackInterface
 {
 	public:
-		FeedBackInterface() {}
+		FeedBackInterface() = default;
 
-		virtual ~FeedBackInterface() {}
+		virtual ~FeedBackInterface() = default;
 
 		virtual void update() = 0;
 
-		virtual void addLogMessage(const Log::LogItem log) = 0;
-		void addLogMessage(const Log::Importance i, const std::string text)
+		virtual void addLogMessage(Log::LogItem log) = 0;
+		void addLogMessage(const Log::Importance i, const std::string& text)
 		{
 			addLogMessage(Log::LogItem(i, text));
 		}
 
-		virtual bool HasUserCancelled() const = 0;
+		[[nodiscard]] virtual bool HasUserCancelled() const = 0;
 };
 
 #endif

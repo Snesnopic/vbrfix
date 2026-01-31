@@ -28,14 +28,14 @@ class Mp3ObjectCheckerInterface
 {
 	public:
 		virtual Mp3Object* Check(CheckParameters &rParams) const = 0;
-		virtual ~Mp3ObjectCheckerInterface(){}
+		virtual ~Mp3ObjectCheckerInterface() = default;
 };
 
 template < typename T_Mp3ObjectType>
 class Mp3ObjectChecker : public Mp3ObjectCheckerInterface
 {
 	public:
-		virtual Mp3Object* Check(CheckParameters &rParams) const
+		Mp3Object* Check(CheckParameters &rParams) const override
 		{
 			return T_Mp3ObjectType::Check(rParams);
 		}

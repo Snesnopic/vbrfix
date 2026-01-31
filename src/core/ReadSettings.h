@@ -29,7 +29,7 @@ class ReadSettings
 		virtual ~ReadSettings();
 		
 		void setTreatFreeFormatFramesAsUnknownData(bool bSet);
-		bool getTreatFreeFormatFramesAsUnknownData() const;
+		[[nodiscard]] bool getTreatFreeFormatFramesAsUnknownData() const;
 	protected:
 		bool m_bTreatFreeFormatFramesAsUnknownData;
 

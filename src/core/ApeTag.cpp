@@ -33,11 +33,9 @@ ApeTag::ApeTag(unsigned long oldFilePosition, unsigned long Size)
 }
 
 
-ApeTag::~ApeTag()
-{
-}
+ApeTag::~ApeTag()= default;
 
-ApeTag * ApeTag::Check(CheckParameters & rParams)
+ApeTag * ApeTag::Check(const CheckParameters & rParams)
 {
 	const FileBuffer& mp3FileBuffer(rParams.m_mp3FileBuffer);
 	
@@ -70,15 +68,9 @@ ApeTag * ApeTag::Check(CheckParameters & rParams)
 						rParams.m_feedBack.addLogMessage(Log::LOG_INFO, "Found Ape Tag");
 						return new ApeTag(mp3FileBuffer.position(), size);
 					}
-					else
-					{
-						throw "Vbrfix doesn't currently support headerless ApeTags, treating as unknown data";
-					}
+					throw "Vbrfix doesn't currently support headerless ApeTags, treating as unknown data";
 				}
-				else
-				{
-					rParams.m_feedBack.addLogMessage( Log::LOG_WARNING, "APE tag goes off end of the file, treating as unknown data");
-				}
+				rParams.m_feedBack.addLogMessage( Log::LOG_WARNING, "APE tag goes off end of the file, treating as unknown data");
 			}
 			else
 			{
@@ -86,7 +78,7 @@ ApeTag * ApeTag::Check(CheckParameters & rParams)
 			}
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 unsigned long ApeTag::size() const

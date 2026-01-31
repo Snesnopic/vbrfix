@@ -29,8 +29,8 @@ namespace EndianHelper
 {
 	bool IsBigEndian();
 	unsigned long ConvertToBigEndian(unsigned long uLong);
-	unsigned long ConvertToNativeFromBigEndian(unsigned char* pBuffer);
-	unsigned long ConvertToNativeFromLittleEndian(unsigned char* pBuffer);
+	unsigned long ConvertToNativeFromBigEndian(const unsigned char* pBuffer);
+	unsigned long ConvertToNativeFromLittleEndian(const unsigned char* pBuffer);
 
 	void WriteToFileAsBigEndian(std::ofstream& file, unsigned long uData);
 	std::vector<unsigned char> ConvertToBigEndianBytes(unsigned long uData);

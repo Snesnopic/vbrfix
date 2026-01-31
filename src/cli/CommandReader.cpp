@@ -39,16 +39,14 @@ CommandReader::CommandReader(const ArgList& originalArgs)
 		m_ProgramName = args.front();
 		args.pop_front();
 	}
-	for(ArgList::const_iterator iter = args.begin(); iter != args.end(); ++iter)
+	for(const auto & arg : args)
 	{
-		ProcessArg( *iter );
+		ProcessArg( arg );
 	}
 }
 
 
-CommandReader::~CommandReader()
-{
-}
+CommandReader::~CommandReader() = default;
 
 void CommandReader::ProcessArg( const std::string & arg )
 {

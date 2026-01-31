@@ -30,9 +30,7 @@ namespace
 	std::string gConsoleVersionString = "-0";
 }
 
-ConsoleFixer::~ConsoleFixer()
-{
-}
+ConsoleFixer::~ConsoleFixer() = default;
 
 ConsoleFixer::ConsoleFixer(const CommandList& args)
 	: m_Args(args)
@@ -81,7 +79,7 @@ bool ConsoleFixer::Run( )
 bool ConsoleFixer::GetFixerSettingsFromOptions(FixerSettings &settings,
 					       const CommandReader::OptionList &optionList)
 {
-	for (CommandReader::OptionList::const_iterator iter = optionList.begin();
+	for (auto iter = optionList.begin();
 	     iter != optionList.end(); ++iter)
 	{
 		const std::string & option = *iter;

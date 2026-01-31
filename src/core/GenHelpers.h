@@ -27,7 +27,7 @@ class ArrayDeleter
 {
 	T* m_array;
 	public:
-		ArrayDeleter(T* array) : m_array(array) {};
+		explicit ArrayDeleter(T* array) : m_array(array) {};
 		~ArrayDeleter()
 		{
 			delete[] m_array;

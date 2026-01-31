@@ -33,17 +33,15 @@ Lyrics3Tag::Lyrics3Tag(unsigned long oldFilePosition, unsigned long Size)
 }
 
 
-Lyrics3Tag::~Lyrics3Tag()
-{
-}
+Lyrics3Tag::~Lyrics3Tag() = default;
 
-Lyrics3Tag * Lyrics3Tag::Check(CheckParameters & rParams)
+Lyrics3Tag * Lyrics3Tag::Check(const CheckParameters& rParams)
 {
 	const FileBuffer& mp3FileBuffer(rParams.m_mp3FileBuffer);
 	const std::string sStartIdentifier = "LYRICSBEGIN";
 	const std::string sEndIdentifier = "LYRICSEND";
 	const std::string sEndIdentifier200 = "LYRICS200";
-	const int maxOldTagSizeSize = 5100;
+	constexpr int maxOldTagSizeSize = 5100;
 	const int maxNewTagSize = 999999 + sEndIdentifier200.size();
 
 	if(mp3FileBuffer.DoesSay(sStartIdentifier))
@@ -53,12 +51,12 @@ Lyrics3Tag * Lyrics3Tag::Check(CheckParameters & rParams)
 			if(!mp3FileBuffer.CanRead(i))
 			{
 				rParams.m_feedBack.addLogMessage(Log::LOG_WARNING, "Partial LYRICSTAG detected, treating as unknown data");
-				return NULL;
+				return nullptr;
 			}
 			if(mp3FileBuffer[i] == 255)
 			{
 				rParams.m_feedBack.addLogMessage(Log::LOG_WARNING, "Partial LYRICSTAG detected(byte value 255 found in the data), treating as unknown data");
-				return NULL;
+				return nullptr;
 			}
 			if((i < maxOldTagSizeSize) && mp3FileBuffer.DoesSay(sEndIdentifier, i)) // goes a little further than it needs
 			{
@@ -72,7 +70,7 @@ Lyrics3Tag * Lyrics3Tag::Check(CheckParameters & rParams)
 			}
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 unsigned long Lyrics3Tag::size() const

@@ -65,14 +65,14 @@ bool Mp3Header::IsValid( ) const
 Mp3Header::MpegVersion Mp3Header::GetMpegVersion( ) const
 {
 	const _ul32 iIndex = MPEG_MASK.GetIndex(m_Header);
-	static const MpegVersion mpegVer[] = {MPEG_VERSION_2_5, MPEG_VERSION_RESERVED, MPEG_VERSION_2, MPEG_VERSION_1};
+	static constexpr MpegVersion mpegVer[] = {MPEG_VERSION_2_5, MPEG_VERSION_RESERVED, MPEG_VERSION_2, MPEG_VERSION_1};
 	return mpegVer[iIndex];
 }
 
 Mp3Header::MpegLayerVersion Mp3Header::GetLayerVersion( ) const
 {
 	const _ul32 iIndex = LAYER_MASK.GetIndex(m_Header);
-	static const MpegLayerVersion layerVer[] = {LAYER_VERSION_RESERVED, LAYER_VERSION_3, LAYER_VERSION_2, LAYER_VERSION_1};
+	static constexpr MpegLayerVersion layerVer[] = {LAYER_VERSION_RESERVED, LAYER_VERSION_3, LAYER_VERSION_2, LAYER_VERSION_1};
 	return layerVer[iIndex];
 }
 
@@ -103,7 +103,7 @@ bool Mp3Header::IsOriginal() const
 
 int Mp3Header::GetSampleFrequency( ) const
 {
-	static const int sampFreqs[][4] =
+	static constexpr int sampFreqs[][4] =
 	{
 		{44100, 48000, 32000, SAMPLE_FREQ_ERROR}, //MPEG 1
 		{22050, 24000, 16000, SAMPLE_FREQ_ERROR}, //MPEG 2
@@ -134,14 +134,14 @@ int Mp3Header::GetKBitRate() const
 {
 	const _ul32 iIndex = BITRATE_MASK.GetIndex(m_Header);
 
-	static const int mpeg1layer1[]   = {BITRATE_FREE, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, BITRATE_ERRROR};
-	static const int mpeg1layer2[]   = {BITRATE_FREE, 32, 48, 56,  64,  80,  96, 112, 128, 160, 192, 224, 256, 320, 384, BITRATE_ERRROR};
-	static const int mpeg1layer3[]   = {BITRATE_FREE, 32, 40, 48,  56,  64,  80,  96, 112, 128, 160, 192, 224, 256, 320, BITRATE_ERRROR};
-	static const int mpeg2layer1[]   = {BITRATE_FREE, 32, 48, 56,  64,  80,  96, 112, 128, 144, 160, 176, 192, 224, 256, BITRATE_ERRROR};
-	static const int mpeg2layer2n3[] = {BITRATE_FREE,  8, 16, 24,  32,  40,  48,  56,  64,  80,  96, 112, 128, 144, 160, BITRATE_ERRROR};
+	static constexpr int mpeg1layer1[]   = {BITRATE_FREE, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, BITRATE_ERRROR};
+	static constexpr int mpeg1layer2[]   = {BITRATE_FREE, 32, 48, 56,  64,  80,  96, 112, 128, 160, 192, 224, 256, 320, 384, BITRATE_ERRROR};
+	static constexpr int mpeg1layer3[]   = {BITRATE_FREE, 32, 40, 48,  56,  64,  80,  96, 112, 128, 160, 192, 224, 256, 320, BITRATE_ERRROR};
+	static constexpr int mpeg2layer1[]   = {BITRATE_FREE, 32, 48, 56,  64,  80,  96, 112, 128, 144, 160, 176, 192, 224, 256, BITRATE_ERRROR};
+	static constexpr int mpeg2layer2n3[] = {BITRATE_FREE,  8, 16, 24,  32,  40,  48,  56,  64,  80,  96, 112, 128, 144, 160, BITRATE_ERRROR};
 
 	// decide witch table to use
-	const int* pBitRateTable = 0;
+	const int* pBitRateTable = nullptr;
 	switch(GetMpegVersion())
 	{
 		case MPEG_VERSION_1:
@@ -174,11 +174,7 @@ int Mp3Header::GetKBitRate() const
 	{
 		return pBitRateTable[iIndex];
 	}
-	else
-	{
-		return BITRATE_ERRROR;
-	}
-
+	return BITRATE_ERRROR;
 }
 
 int Mp3Header::GetSizeCoef1() const
@@ -204,7 +200,7 @@ int Mp3Header::GetSizeCoef1() const
 	}
 	assert(0);
 	throw("Error calculating frame size");
-	return 1; 
+	return 1;
 }
 
 int Mp3Header::GetSizeCoef2() const
@@ -231,7 +227,7 @@ int Mp3Header::GetFrameSize( ) const
 	{
 		return FRAME_SIZE_ERROR;
 	}
-	else if(iBitRate == BITRATE_FREE)
+	if(iBitRate == BITRATE_FREE)
 	{
 		// TODO do something better with free bitrate
 		// for now check with IsFreeBitrate() before asking for the frame size
@@ -239,14 +235,11 @@ int Mp3Header::GetFrameSize( ) const
 		assert(0);
 		return FRAME_SIZE_ERROR;
 	}
-	else
-	{
-		const int coef1 = GetSizeCoef1();
-		const int coef2 = GetSizeCoef2();
-		const int paddingSize = (IsPadded() ? 1 : 0);
-		const int size = (coef1 * iBitRate / iSampFreq + paddingSize) * coef2;
-		return size;
-	}
+	const int coef1 = GetSizeCoef1();
+	const int coef2 = GetSizeCoef2();
+	const int paddingSize = (IsPadded() ? 1 : 0);
+	const int size = (coef1 * iBitRate / iSampFreq + paddingSize) * coef2;
+	return size;
 }
 
 int Mp3Header::GetBitRate( ) const
@@ -262,7 +255,7 @@ int Mp3Header::GetBitRate( ) const
 Mp3Header::ChannelMode Mp3Header::GetChannelMode( ) const
 {
 	const _ul32 iIndex = CHANNEL_MASK.GetIndex(m_Header);
-	static ChannelMode chans[] = {CHAN_STEREO, CHAN_JOINT_STEREO, CHAN_DUAL_CHANNEL, CHAN_MONO};
+	static constexpr ChannelMode chans[] = {CHAN_STEREO, CHAN_JOINT_STEREO, CHAN_DUAL_CHANNEL, CHAN_MONO};
 	return chans[iIndex];
 }
 
@@ -308,7 +301,7 @@ void Mp3Header::RemoveCrcProtection( )
 Mp3Header::ModeExtension Mp3Header::GetModeExtension() const
 {
 	const _ul32 iIndex = MODE_EXT_MASK.GetIndex(m_Header);
-	static ModeExtension chans[] = {BANDS4to31, BANDS8to31, BANDS12to31, BANDS16to3};
+	static constexpr ModeExtension chans[] = {BANDS4to31, BANDS8to31, BANDS12to31, BANDS16to3};
 	return chans[iIndex];
 }
 

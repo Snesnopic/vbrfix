@@ -22,15 +22,14 @@
 #include "FixerSettings.h"
 
 FixerSettings::FixerSettings( )
-	: ReadSettings()
-	, m_AlwaysSkip(false)
-	, m_MinPercentUnderstood(99)
-	, m_bLogDetail(true)
-	, m_LameInfoOption(LAME_KEEP)
-	, m_bSkipNonVbr(true)
-	, m_XingFrameCrcOption(CRC_REMOVE)
-	, m_bSkipIfXingTagLooksGood(true)
-	, m_bRemoveInconsistentFrames(false)
+	: m_AlwaysSkip(false)
+	  , m_MinPercentUnderstood(99)
+	  , m_bLogDetail(true)
+	  , m_LameInfoOption(LAME_KEEP)
+	  , m_bSkipNonVbr(true)
+	  , m_bSkipIfXingTagLooksGood(true)
+	  , m_XingFrameCrcOption(CRC_REMOVE)
+	  , m_bRemoveInconsistentFrames(false)
 {
 	m_RemoveTypes.insert(Mp3ObjectType::XING_FRAME);
 	m_RemoveTypes.insert(Mp3ObjectType::VBRI_FRAME);
