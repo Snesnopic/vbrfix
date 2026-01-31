@@ -114,9 +114,7 @@ jobs:
           - arch: aarch64
             asset_name: vbrfix-freebsd-arm64
             release: '15.0'
-          - arch: riscv64
-            asset_name: vbrfix-freebsd-riscv64
-            release: '15.0'
+
     steps:
       - uses: actions/checkout@v4
 
