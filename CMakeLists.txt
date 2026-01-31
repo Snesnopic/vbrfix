@@ -4,42 +4,16 @@ project(vbrfix CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include_directories(Fixer)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-set(FIXER_SOURCES
-        Fixer/ApeTag.cpp
-        Fixer/CrcCalc.cpp
-        Fixer/EndianHelper.cpp
-        Fixer/FileBuffer.cpp
-        Fixer/FixerSettings.cpp
-        Fixer/Id3Tags.cpp
-        Fixer/Mp3FileObject.cpp
-        Fixer/Mp3Frame.cpp
-        Fixer/Mp3Header.cpp
-        Fixer/Mp3Reader.cpp
-        Fixer/ReadSettings.cpp
-        Fixer/UnknownDataObject.cpp
-        Fixer/VbrFixer.cpp
-        Fixer/VbriFrame.cpp
-        Fixer/Version.cpp
-        Fixer/XingFrame.cpp
-        Fixer/LyricsTag.cpp
-        Fixer/BitReader.h
-        Fixer/FeedBackInterface.h
-        Fixer/FrameObjectChecker.h
-        Fixer/GenHelpers.h
-        Fixer/Mp3FileObjectChecker.h
-)
+# --- Core Library ---
+file(GLOB CORE_SOURCES "src/core/*.cpp")
+add_library(vbrfix_core STATIC ${CORE_SOURCES})
+target_include_directories(vbrfix_core PUBLIC src/core)
 
-add_library(FixerLib STATIC ${FIXER_SOURCES})
-
-set(CONSOLE_SOURCES
-        ConsoleFixer/main.cpp
-        ConsoleFixer/ConsoleFixer.cpp
-        ConsoleFixer/CommandReader.cpp
-)
-
-add_executable(vbrfix ${CONSOLE_SOURCES})
-
-target_link_libraries(vbrfix PRIVATE FixerLib)
-target_include_directories(vbrfix PRIVATE Fixer)
+# --- CLI Executable ---
+add_executable(vbrfix src/cli/main.cpp src/cli/ConsoleFixer.cpp src/cli/CommandReader.cpp)
+target_link_libraries(vbrfix PRIVATE vbrfix_core)
+target_include_directories(vbrfix PRIVATE src/cli)
