@@ -57,11 +57,11 @@ jobs:
             install_deps: sudo apt-get update && sudo apt-get install -y g++-multilib
 
           - name: macOS Intel
-            os: macos-13
+            os: macos-15-intel
             arch: x64
 
           - name: macOS ARM64
-            os: macos-14
+            os: macos-26
             arch: arm64
 
     steps:
@@ -88,9 +88,9 @@ jobs:
         with:
           name: vbrfix-${{ matrix.name }}
           path: |
-            build/Release/vbrfix.exe
-            build/vbrfix
-            build/Release/vbrfix
+            build/bin/vbrfix
+            build/bin/vbrfix.exe
+            build/bin/Release/vbrfix.exe
 
   build-freebsd:
     name: FreeBSD ${{ matrix.arch }}
@@ -99,7 +99,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - arch: x86-64
+          - arch: x86_64
           - arch: aarch64
     steps:
       - uses: actions/checkout@v4
