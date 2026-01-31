@@ -206,8 +206,8 @@ void VbrFixer::Fix( const std::string & sInFileName, const std::string & sOutFil
 		// if there is just a lyrics tag and no ide3v1 tag then give an error
 		{
 			Mp3ObjectType::Set objTypes; // get all of the remaining object types
-			std::transform(Mp3Objects.begin(), Mp3Objects.end(), 
-				std::inserter(objTypes, objTypes.end()), std::mem_fun(&Mp3Object::GetObjectType));
+			std::transform(Mp3Objects.begin(), Mp3Objects.end(),
+			std::inserter(objTypes, objTypes.end()), [](const Mp3Object* obj){ return obj->GetObjectType(); });
 
 			assert(!objTypes.empty());
 			
@@ -228,7 +228,7 @@ void VbrFixer::Fix( const std::string & sInFileName, const std::string & sOutFil
 		}
 	
 		// insert a vbr header object if needed before the 1st frame
-		std::auto_ptr<XingFrame> xingFrame;
+		std::unique_ptr<XingFrame> xingFrame;
 		if(m_ProgressDetails.IsVbr())
 		{
 			Mp3Reader::ConstMp3ObjectList::iterator firstFrame = std::find_if(Mp3Objects.begin(), Mp3Objects.end(), IsOfMp3ObjectType(Mp3ObjectType::GetFrameTypes()));

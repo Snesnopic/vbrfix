@@ -65,7 +65,9 @@ Id3v2Tag * Id3v2Tag::Check(CheckParameters & rParams)
 	const std::string sTagIdentifier = "ID3";
 	const unsigned long headerBytesMustBeLessThan[] =
 	{
-		sTagIdentifier[0] + 1, sTagIdentifier[1] + 1,  sTagIdentifier[2] + 1,
+		static_cast<unsigned long>(sTagIdentifier[0] + 1),
+		static_cast<unsigned long>(sTagIdentifier[1] + 1),
+		static_cast<unsigned long>(sTagIdentifier[2] + 1),
 		255, 255, 256 /* flags could be better*/, 128, 128, 128, 128
 	};
 

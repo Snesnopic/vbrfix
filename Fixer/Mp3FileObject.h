@@ -50,14 +50,14 @@ class Mp3ObjectType
 		bool IsTypeOfTag() const;
 		bool IsUnknown() const;
 
-		ObjectId GetObjectId() const {return m_Type;}
+		[[nodiscard]] ObjectId GetObjectId() const {return m_Type;}
 	
 		static const Set& GetTypes();
 		static const Set& GetFrameTypes();
 		static const Set& GetTagTypes();
 
 		bool operator < (const Mp3ObjectType& rOther) const;
-		Mp3ObjectType& operator = (const Mp3ObjectType& rOther);
+		Mp3ObjectType& operator = (const Mp3ObjectType& rOther) = default;
 		
 	private:
 		ObjectId m_Type;
@@ -82,17 +82,17 @@ class Mp3Object
 		typedef Mp3ObjectType::Set Mp3ObjectTypeSet;
 
 		Mp3Object(); // not from a file
-		Mp3Object(unsigned long iFromFilePosition);
+		explicit Mp3Object(unsigned long iFromFilePosition);
 
 		virtual ~Mp3Object();
 		
-		virtual Mp3ObjectType GetObjectType() const = 0;
-		virtual unsigned long size() const = 0;
+		[[nodiscard]] virtual Mp3ObjectType GetObjectType() const = 0;
+		[[nodiscard]] virtual unsigned long size() const = 0;
 
 		// original file position (if from original file)
-		virtual bool IsFromFile() const;
-		virtual unsigned long getOldFilePosition() const;
-		virtual unsigned long getOldEndOfObjectFilePosition() const;
+		[[nodiscard]] virtual bool IsFromFile() const;
+		[[nodiscard]] virtual unsigned long getOldFilePosition() const;
+		[[nodiscard]] virtual unsigned long getOldEndOfObjectFilePosition() const;
 
 		virtual void writeToFile(FileBuffer & originalFile, std::ofstream & rOutFile) const;
 	private:

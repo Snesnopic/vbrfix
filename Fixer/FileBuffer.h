@@ -63,7 +63,7 @@ class FileBuffer
 		pos_type GetLength() const {return m_Length;}
 		
 	private:
-		const std::auto_ptr<std::ifstream> m_Stream;
+		const std::unique_ptr<std::ifstream> m_Stream;
 		mutable std::deque<unsigned char> m_InternalBuffer;
 		const std::string m_FileName;
 		pos_type m_Length;

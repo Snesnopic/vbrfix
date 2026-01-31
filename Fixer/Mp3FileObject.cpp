@@ -110,7 +110,9 @@ const Mp3ObjectType::Set & Mp3ObjectType::GetFrameTypes( )
 	if(types.empty())
 	{
 		const Set& allTypes = GetTypes();
-		std::remove_copy_if(allTypes.begin(), allTypes.end(), inserter(types, types.begin()), std::not1(std::mem_fun_ref(&Mp3ObjectType::IsTypeOfFrame)));
+		std::copy_if(allTypes.begin(), allTypes.end(),
+					 inserter(types, types.begin()),
+					 [](const Mp3ObjectType& obj){ return obj.IsTypeOfFrame(); });
 	}
 	return types;
 }
@@ -121,7 +123,9 @@ const Mp3ObjectType::Set & Mp3ObjectType::GetTagTypes( )
 	if(types.empty())
 	{
 		const Set& allTypes = GetTypes();
-		std::remove_copy_if(allTypes.begin(), allTypes.end(), inserter(types, types.begin()), std::not1(std::mem_fun_ref(&Mp3ObjectType::IsTypeOfTag)));
+		std::copy_if(allTypes.begin(), allTypes.end(),
+					 inserter(types, types.begin()),
+					 [](const Mp3ObjectType& obj){ return obj.IsTypeOfTag(); });
 	}
 	return types;
 }
