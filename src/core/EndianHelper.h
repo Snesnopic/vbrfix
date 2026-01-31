@@ -22,18 +22,48 @@
 #ifndef ENDIANHELPER_H
 #define ENDIANHELPER_H
 
-#include <fstream>
+#include <cstdint>
 #include <vector>
+#include <ostream>
 
 namespace EndianHelper
 {
-	bool IsBigEndian();
-	unsigned long ConvertToBigEndian(unsigned long uLong);
-	unsigned long ConvertToNativeFromBigEndian(const unsigned char* pBuffer);
-	unsigned long ConvertToNativeFromLittleEndian(const unsigned char* pBuffer);
+	inline uint32_t ConvertToNativeFromBigEndian(const uint8_t* pBuffer)
+	{
+		return (static_cast<uint32_t>(pBuffer[0]) << 24) |
+			   (static_cast<uint32_t>(pBuffer[1]) << 16) |
+			   (static_cast<uint32_t>(pBuffer[2]) << 8)  |
+			   (static_cast<uint32_t>(pBuffer[3]));
+	}
 
-	void WriteToFileAsBigEndian(std::ofstream& file, unsigned long uData);
-	std::vector<unsigned char> ConvertToBigEndianBytes(unsigned long uData);
+	inline uint32_t ConvertToNativeFromLittleEndian(const uint8_t* pBuffer)
+	{
+		return (static_cast<uint32_t>(pBuffer[3]) << 24) |
+			   (static_cast<uint32_t>(pBuffer[2]) << 16) |
+			   (static_cast<uint32_t>(pBuffer[1]) << 8)  |
+			   (static_cast<uint32_t>(pBuffer[0]));
+	}
+
+	inline void WriteToFileAsBigEndian(std::ostream& file, const uint32_t uData)
+	{
+		const uint8_t bytes[4] = {
+			static_cast<uint8_t>((uData >> 24) & 0xFF),
+			static_cast<uint8_t>((uData >> 16) & 0xFF),
+			static_cast<uint8_t>((uData >> 8)  & 0xFF),
+			static_cast<uint8_t>(uData & 0xFF)
+		};
+		file.write(reinterpret_cast<const char*>(bytes), 4);
+	}
+
+	inline std::vector<uint8_t> ConvertToBigEndianBytes(const uint32_t uData)
+	{
+		return {
+			static_cast<uint8_t>((uData >> 24) & 0xFF),
+			static_cast<uint8_t>((uData >> 16) & 0xFF),
+			static_cast<uint8_t>((uData >> 8)  & 0xFF),
+			static_cast<uint8_t>(uData & 0xFF)
+		};
+	}
 }
 
-#endif
+#endif // ENDIANHELPER_H
