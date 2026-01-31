@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.name }}
+    name: ${{ matrix.asset_name }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -19,34 +19,40 @@ jobs:
             os: windows-2022
             arch: x64
             cmake_args: -A x64
+            asset_name: vbrfix-windows-x64
 
           - name: Windows ARM64
             os: windows-2022
             arch: arm64
             cmake_args: -A ARM64
+            asset_name: vbrfix-windows-arm64
 
           - name: Windows x86
             os: windows-2022
             arch: x86
             cmake_args: -A Win32
+            asset_name: vbrfix-windows-x86
 
           - name: Ubuntu x64 GCC
             os: ubuntu-24.04
             arch: x64
             compiler_c: gcc
             compiler_cxx: g++
+            asset_name: vbrfix-linux-x64-gcc
 
           - name: Ubuntu x64 Clang
             os: ubuntu-24.04
             arch: x64
             compiler_c: clang
             compiler_cxx: clang++
+            asset_name: vbrfix-linux-x64-clang
 
           - name: Ubuntu ARM64 GCC
             os: ubuntu-24.04-arm
             arch: arm64
             compiler_c: gcc
             compiler_cxx: g++
+            asset_name: vbrfix-linux-arm64
 
           - name: Ubuntu x86 GCC
             os: ubuntu-24.04
@@ -55,14 +61,17 @@ jobs:
             compiler_cxx: g++
             cmake_args: -DCMAKE_CXX_FLAGS=-m32 -DCMAKE_C_FLAGS=-m32
             install_deps: sudo apt-get update && sudo apt-get install -y g++-multilib
+            asset_name: vbrfix-linux-x86
 
           - name: macOS Intel
             os: macos-15-intel
             arch: x64
+            asset_name: vbrfix-darwin-x64
 
           - name: macOS ARM64
             os: macos-26
             arch: arm64
+            asset_name: vbrfix-darwin-arm64
 
     steps:
       - uses: actions/checkout@v4
@@ -86,21 +95,28 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: vbrfix-${{ matrix.name }}
+          name: ${{ matrix.asset_name }}
           path: |
             build/bin/vbrfix
             build/bin/vbrfix.exe
             build/bin/Release/vbrfix.exe
 
   build-freebsd:
-    name: FreeBSD ${{ matrix.arch }}
+    name: ${{ matrix.asset_name }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         include:
           - arch: x86_64
+            asset_name: vbrfix-freebsd-x64
+            release: '15.0'
           - arch: aarch64
+            asset_name: vbrfix-freebsd-arm64
+            release: '15.0'
+          - arch: riscv64
+            asset_name: vbrfix-freebsd-riscv64
+            release: '15.0'
     steps:
       - uses: actions/checkout@v4
 
@@ -109,6 +125,7 @@ jobs:
         with:
           usesh: true
           arch: ${{ matrix.arch }}
+          release: ${{ matrix.release }}
           prepare: pkg install -y cmake git
           run: |
             cmake -B build -DCMAKE_BUILD_TYPE=Release
@@ -117,5 +134,8 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: vbrfix-FreeBSD-${{ matrix.arch }}
-          path: build/vbrfix
+          name: ${{ matrix.asset_name }}
+          path: |
+            build/bin/vbrfix
+            build/bin/vbrfix.exe
+            build/bin/Release/vbrfix.exe
