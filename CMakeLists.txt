@@ -17,3 +17,6 @@ target_include_directories(vbrfix_core PUBLIC src/core)
 add_executable(vbrfix src/cli/main.cpp src/cli/ConsoleFixer.cpp src/cli/CommandReader.cpp)
 target_link_libraries(vbrfix PRIVATE vbrfix_core)
 target_include_directories(vbrfix PRIVATE src/cli)
+
+include(GNUInstallDirs)
+install(TARGETS vbrfix DESTINATION ${CMAKE_INSTALL_BINDIR})
