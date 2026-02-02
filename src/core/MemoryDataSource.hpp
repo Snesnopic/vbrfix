@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <algorithm>
-
+#include <cstring>
 #include "IDataSource.hpp"
 
 class MemoryDataSource : public IDataSource {
