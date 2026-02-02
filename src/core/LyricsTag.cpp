@@ -38,9 +38,9 @@ Lyrics3Tag::~Lyrics3Tag() = default;
 Lyrics3Tag * Lyrics3Tag::Check(const CheckParameters& rParams)
 {
 	const FileBuffer& mp3FileBuffer(rParams.m_mp3FileBuffer);
-	constexpr std::string sStartIdentifier = "LYRICSBEGIN";
-	constexpr std::string sEndIdentifier = "LYRICSEND";
-	constexpr std::string sEndIdentifier200 = "LYRICS200";
+	constexpr std::string_view sStartIdentifier = "LYRICSBEGIN";
+	constexpr std::string_view sEndIdentifier = "LYRICSEND";
+	constexpr std::string_view sEndIdentifier200 = "LYRICS200";
 	constexpr int maxOldTagSizeSize = 5100;
 	constexpr int maxNewTagSize = 999999 + sEndIdentifier200.size();
 
