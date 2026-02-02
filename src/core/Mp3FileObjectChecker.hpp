@@ -19,54 +19,26 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#ifndef BITREADER_H
-#define BITREADER_H
+#ifndef MP3FILEOBJECTCHECKER_HPP
+#define MP3FILEOBJECTCHECKER_HPP
 
-#include <cstdint>
+class Mp3Object; class FileBuffer; class FeedBackInterface; class CheckParameters;
 
-class IndexMask
+class Mp3ObjectCheckerInterface
 {
-	using _ul32 = uint32_t;
-	static _ul32 MakeMask(const _ul32 iIndex, const _ul32 iBits = 1)
-	{
-		_ul32 mask = 0;
-		for(unsigned int i = 0; i < iBits; ++i)
-		{
-			if(i > 0) mask = (mask << 1);
-			mask |= 1;
-		}
-		mask = (mask << iIndex);
-		return mask;
-	}
-
 	public:
-		explicit IndexMask(const _ul32 iIndex, const _ul32 iBits = 1)
-			: m_mask(MakeMask(iIndex, iBits))
-			, m_maskShift(iIndex)
+		virtual Mp3Object* Check(CheckParameters &rParams) const = 0;
+		virtual ~Mp3ObjectCheckerInterface() = default;
+};
+
+template < typename T_Mp3ObjectType>
+class Mp3ObjectChecker : public Mp3ObjectCheckerInterface
+{
+	public:
+		Mp3Object* Check(CheckParameters &rParams) const override
 		{
-		}
-		const _ul32 m_mask;
-		const _ul32 m_maskShift;
-		[[nodiscard]] _ul32 GetIndex(const _ul32 bits) const
-		{
-			return ((bits & m_mask) >> m_maskShift);
-		}
-		[[nodiscard]] bool IsOn(const _ul32 bits) const
-		{
-			return ((bits & m_mask) != 0);
-		}
-		[[nodiscard]] bool areAllOn(const _ul32 bits) const
-		{
-			return ((bits & m_mask) == m_mask);
-		}
-		void SetIndex(_ul32 &bits, const int iIndex) const
-		{
-			bits &= (~m_mask); // remove current value
-			bits |= (m_mask & (iIndex << m_maskShift));
-		}
-		void SetOn(_ul32 &bits, const bool bValue) const
-		{
-			SetIndex(bits, bValue ? 1 : 0);
+			return T_Mp3ObjectType::Check(rParams);
 		}
 };
+
 #endif

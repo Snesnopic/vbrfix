@@ -19,23 +19,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#ifndef VBRIFRAME_H
-#define VBRIFRAME_H
+#ifndef CRCALC_HPP
+#define CRCALC_HPP
 
-#include "Mp3Frame.h"
-
-class VbriFrame : public Mp3Frame
+namespace CrcHelper
 {
-	public:
-		explicit VbriFrame(const Mp3Header & header);
-		
-		[[nodiscard]] Mp3ObjectType GetObjectType() const override {return Mp3ObjectType(Mp3ObjectType::VBRI_FRAME);}
-		
-		static VbriFrame * Check(CheckParameters & rParams);
-		
-		~VbriFrame() override;
-	protected:
-		VbriFrame(unsigned long oldFilePosition, const Mp3Header &header);
-};
+	int CRC_update_lookup(int value, int crc);
+	int CrcMp3FrameUpdate(int value, int crc);
+}
 
 #endif

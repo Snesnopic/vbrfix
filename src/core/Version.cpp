@@ -19,9 +19,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#include "VbrFixer.h"
+#include "VbrFixer.hpp"
 
 std::string VbrFixer::GetFixerVersion( )
 {
-	return "0.33(beta)";
+	return "0.34";
 }

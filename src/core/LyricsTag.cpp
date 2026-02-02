@@ -19,14 +19,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#include "LyricsTag.h"
-#include "FeedBackInterface.h"
-#include "FileBuffer.h"
-#include "BitReader.h"
+#include "LyricsTag.hpp"
+#include "FeedBackInterface.hpp"
+#include "FileBuffer.hpp"
+#include "BitReader.hpp"
 #include <string>
 #include <cassert>
 
-Lyrics3Tag::Lyrics3Tag(unsigned long oldFilePosition, unsigned long Size)
+Lyrics3Tag::Lyrics3Tag(const unsigned long oldFilePosition, const unsigned long Size)
 	: Mp3Object(oldFilePosition)
 	, m_Size(Size)
 {
@@ -38,11 +38,11 @@ Lyrics3Tag::~Lyrics3Tag() = default;
 Lyrics3Tag * Lyrics3Tag::Check(const CheckParameters& rParams)
 {
 	const FileBuffer& mp3FileBuffer(rParams.m_mp3FileBuffer);
-	const std::string sStartIdentifier = "LYRICSBEGIN";
-	const std::string sEndIdentifier = "LYRICSEND";
-	const std::string sEndIdentifier200 = "LYRICS200";
+	constexpr std::string sStartIdentifier = "LYRICSBEGIN";
+	constexpr std::string sEndIdentifier = "LYRICSEND";
+	constexpr std::string sEndIdentifier200 = "LYRICS200";
 	constexpr int maxOldTagSizeSize = 5100;
-	const int maxNewTagSize = 999999 + sEndIdentifier200.size();
+	constexpr int maxNewTagSize = 999999 + sEndIdentifier200.size();
 
 	if(mp3FileBuffer.DoesSay(sStartIdentifier))
 	{

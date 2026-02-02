@@ -19,11 +19,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#ifndef MP3FILEOBJECT_H
-#define MP3FILEOBJECT_H
+#ifndef MP3FILEOBJECT_HPP
+#define MP3FILEOBJECT_HPP
 
 #include <iosfwd>
 #include <set>
+#include <vector>
 
 class Mp3ObjectType
 {
@@ -39,26 +40,25 @@ class Mp3ObjectType
 			LYRICS_TAG,
 			APE_TAG
 		};
-		
-		typedef std::set<ObjectId> ObjectIdSet;
-		typedef std::set<Mp3ObjectType> Set;
+
+		using ObjectIdSet = std::set<ObjectId>;
+		using Set = std::set<Mp3ObjectType>;
 
 		Mp3ObjectType(ObjectId type);
-		//Mp3ObjectType(const Mp3ObjectType &rOther);
-	
+
 		[[nodiscard]] bool IsTypeOfFrame() const;
 		[[nodiscard]] bool IsTypeOfTag() const;
 		[[nodiscard]] bool IsUnknown() const;
 
 		[[nodiscard]] ObjectId GetObjectId() const {return m_Type;}
-	
+
 		static const Set& GetTypes();
 		static const Set& GetFrameTypes();
 		static const Set& GetTagTypes();
 
 		bool operator < (const Mp3ObjectType& rOther) const;
 		Mp3ObjectType& operator = (const Mp3ObjectType& rOther) = default;
-		
+
 	private:
 		ObjectId m_Type;
 };
@@ -70,7 +70,7 @@ class CheckParameters
 	public:
 		CheckParameters(const FileBuffer & mp3FileBuffer, FeedBackInterface & feedBack, const ReadSettings & readSettings)
 			: m_mp3FileBuffer(mp3FileBuffer), m_feedBack(feedBack), m_readSettings(readSettings) {}
-		
+
 		const FileBuffer & m_mp3FileBuffer;
 		FeedBackInterface & m_feedBack;
 		const ReadSettings & m_readSettings;
@@ -79,13 +79,13 @@ class CheckParameters
 class Mp3Object
 {
 	public:
-		typedef Mp3ObjectType::Set Mp3ObjectTypeSet;
+		using Mp3ObjectTypeSet = Mp3ObjectType::Set;
 
 		Mp3Object(); // not from a file
 		explicit Mp3Object(unsigned long iFromFilePosition);
 
 		virtual ~Mp3Object();
-		
+
 		[[nodiscard]] virtual Mp3ObjectType GetObjectType() const = 0;
 		[[nodiscard]] virtual unsigned long size() const = 0;
 
@@ -94,7 +94,7 @@ class Mp3Object
 		[[nodiscard]] virtual unsigned long getOldFilePosition() const;
 		[[nodiscard]] virtual unsigned long getOldEndOfObjectFilePosition() const;
 
-		virtual void writeToFile(FileBuffer & originalFile, std::ofstream & rOutFile) const;
+		virtual void write(const FileBuffer & originalFile, std::ostream & rOutStream) const;
 	private:
 		bool m_IsFromFile;
 		unsigned long m_OldFilePosition; // if from file

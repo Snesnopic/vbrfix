@@ -19,64 +19,61 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#include "FileBuffer.h"
-#include "EndianHelper.h"
-#include "GenHelpers.h"
-#include <iterator>
-#include <cmath>
+#include "FileBuffer.hpp"
+#include "EndianHelper.hpp"
 #include <cassert>
 #include <utility>
+#include <stdexcept>
 
-FileBuffer::FileBuffer(std::string  fileName)
-	: m_Stream(new std::ifstream)
- 	, m_FileName(std::move(fileName))
+FileBuffer::FileBuffer(std::unique_ptr<IDataSource> source)
+	: m_source(std::move(source))
 {
-	m_Stream->open(m_FileName.c_str(), std::ios::in | std::ios::binary);
-	if(!m_Stream->is_open())
-	{
-		std::string sError = "Failed To Open File : ";
-		sError += m_FileName;
-		throw(sError);
+	if(!m_source) {
+		throw std::runtime_error("FileBuffer initialized with null source");
 	}
-	// get length of file:
-	m_Stream->seekg(0, std::ios::end);
-	m_Length = m_Stream->tellg();
-	m_Stream->seekg(0, std::ios::beg);
+	if(!m_source->good()) {
+		throw std::runtime_error("DataSource is invalid at initialization");
+	}
 }
 
-
-FileBuffer::~FileBuffer()
-{
-	m_Stream->close();
-}
+FileBuffer::~FileBuffer() = default;
 
 unsigned char FileBuffer::operator [ ]( off_type i ) const
 {
-	const pos_type iCurrentBufferSize = m_InternalBuffer.size();
-	//if this is after our buffer then read more data from the stream
+	const size_t iCurrentBufferSize = m_InternalBuffer.size();
+
 	if(i >= iCurrentBufferSize)
 	{
-		const int size = i - iCurrentBufferSize + 1;
-		unsigned char* buffer = new unsigned char[size];
-		ArrayDeleter cleanUpArray(buffer); // will delete the array when it goes out of scope
-		m_Stream->read(reinterpret_cast<char*>(buffer), size);
-		m_InternalBuffer.insert(m_InternalBuffer.end(), buffer, buffer + size);
-		if(m_Stream->fail()) 
-			throw ("File Read error");
+		const size_t size = i - iCurrentBufferSize + 1;
+
+		std::vector<unsigned char> tempBuffer(size);
+
+		if (!m_source->read(tempBuffer.data(), size)) {
+			throw std::runtime_error("File Read error or Unexpected EOF");
+		}
+
+		m_InternalBuffer.insert(m_InternalBuffer.end(), tempBuffer.begin(), tempBuffer.end());
 	}
 	return m_InternalBuffer[i];
 }
 
 bool FileBuffer::proceed(const off_type i ) const {
-	const pos_type iCurrentBufferSize = m_InternalBuffer.size();
+	const size_t iCurrentBufferSize = m_InternalBuffer.size();
+
 	if(i < iCurrentBufferSize)
-	{ 
+	{
 		m_InternalBuffer.erase(m_InternalBuffer.begin(), m_InternalBuffer.begin() + i);
 	}
 	else
 	{
 		m_InternalBuffer.clear();
-		m_Stream->seekg(i - iCurrentBufferSize, std::ios_base::cur);
+
+		const size_t skipAmount = i - iCurrentBufferSize;
+		size_t currentPos = m_source->position();
+
+		if (!m_source->seek(currentPos + skipAmount)) {
+			return false;
+		}
 	}
 	return true;
 }
@@ -84,34 +81,34 @@ bool FileBuffer::proceed(const off_type i ) const {
 
 FileBuffer::pos_type FileBuffer::position( ) const
 {
-	return (m_Stream->tellg() - pos_type(m_InternalBuffer.size()));
+	return (m_source->position() - m_InternalBuffer.size());
 }
 
 bool FileBuffer::isDataLeft( ) const
 {
-	return (!m_InternalBuffer.empty() || (!m_Stream->eof() && (m_Stream->tellg() < m_Length)));
+	if (!m_InternalBuffer.empty()) return true;
+	return (m_source->position() < m_source->length());
 }
 
 bool FileBuffer::setPosition(const pos_type &iPos ) const {
-	m_Stream->seekg(iPos, std::ios_base::beg);
+	if (!m_source->seek(iPos)) return false;
 	m_InternalBuffer.clear();
 	return true;
 }
 
 bool FileBuffer::readIntoBuffer( unsigned char * pBuffer, const off_type iSize ) const {
 	assert(pBuffer);
-	m_Stream->read(reinterpret_cast<char*>(pBuffer), iSize);
-	return true;
+	return m_source->read(pBuffer, iSize);
 }
 
-void FileBuffer::reopen( ) const {
-	m_Stream->close();
-	m_Stream->open(m_FileName.c_str(), std::ios::in | std::ios::binary);
+void FileBuffer::reset( ) const {
+	m_source->seek(0);
+	m_InternalBuffer.clear();
 }
 
 bool FileBuffer::CanRead(const off_type iCount ) const
 {
-	return (m_Length >= (position() + iCount));
+	return (m_source->length() >= (position() + iCount));
 }
 
 bool FileBuffer::DoesSay(const std::string& sText, const off_type iStartingfromByte) const
@@ -119,7 +116,7 @@ bool FileBuffer::DoesSay(const std::string& sText, const off_type iStartingfromB
 	assert(!sText.empty());
 	if(!CanRead(iStartingfromByte + sText.size()))
 		return false;
-	for(off_type i = 0; i < sText.size(); ++i)
+	for(size_t i = 0; i < sText.size(); ++i)
 	{
 		if(sText[i] != (*this)[i + iStartingfromByte]) return false;
 	}
@@ -128,7 +125,7 @@ bool FileBuffer::DoesSay(const std::string& sText, const off_type iStartingfromB
 
 void FileBuffer::getData(std::vector<unsigned char>& dest, const off_type iStartingfromByte) const
 {
-	for(off_type i = 0; i < dest.size(); ++i)
+	for(size_t i = 0; i < dest.size(); ++i)
 	{
 		dest[i] = (*this)[i + iStartingfromByte];
 	}
@@ -137,7 +134,7 @@ void FileBuffer::getData(std::vector<unsigned char>& dest, const off_type iStart
 unsigned long FileBuffer::GetFromBigEndianToNative(const off_type iStartingfromByte ) const
 {
 	unsigned char buffer[4];
-	for(off_type i = 0; i < sizeof(buffer); ++i)
+	for(size_t i = 0; i < sizeof(buffer); ++i)
 	{
 		buffer[i] = (*this)[iStartingfromByte + i];
 	}
@@ -147,7 +144,7 @@ unsigned long FileBuffer::GetFromBigEndianToNative(const off_type iStartingfromB
 unsigned long FileBuffer::GetFromLitleEndianToNative(const off_type iStartingfromByte ) const
 {
 	unsigned char buffer[4];
-	for(off_type i = 0; i < sizeof(buffer); ++i)
+	for(size_t i = 0; i < sizeof(buffer); ++i)
 	{
 		buffer[i] = (*this)[iStartingfromByte + i];
 	}

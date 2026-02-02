@@ -19,14 +19,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#ifndef FIXERSETTINGS_H
-#define FIXERSETTINGS_H
+#ifndef FIXERSETTINGS_HPP
+#define FIXERSETTINGS_HPP
 
 #include <string>
 #include <vector>
 #include <set>
-#include "Mp3FileObject.h"
-#include "ReadSettings.h"
+#include "Mp3FileObject.hpp"
+#include "ReadSettings.hpp"
 
 // TODO Make it so we have a Setting Class and Settings returns a list of settings
 // with descriptions of there ranges so the gui can generate from the options.

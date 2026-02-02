@@ -19,9 +19,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#include "Id3Tags.h"
-#include "FileBuffer.h"
-#include "FeedBackInterface.h"
+#include "Id3Tags.hpp"
+#include "FileBuffer.hpp"
+#include "FeedBackInterface.hpp"
 #include <sstream>
 
 Id3v1Tag::Id3v1Tag(const unsigned long oldFilePosition)
@@ -37,7 +37,7 @@ Id3v1Tag * Id3v1Tag::Check(const CheckParameters& rParams)
 	const FileBuffer& mp3FileBuffer(rParams.m_mp3FileBuffer);
 	
 	// TODO "TAG+"
-	const std::string sTagIdentifier = "TAG";
+	constexpr std::string sTagIdentifier = "TAG";
 	if(mp3FileBuffer.CanRead(sTagIdentifier.size()))
 	{
 		if(mp3FileBuffer.DoesSay(sTagIdentifier))
@@ -56,8 +56,8 @@ Id3v1Tag * Id3v1Tag::Check(const CheckParameters& rParams)
 Id3v2Tag * Id3v2Tag::Check(const CheckParameters& rParams)
 {
 	const FileBuffer& mp3FileBuffer(rParams.m_mp3FileBuffer);
-	
-	const std::string sTagIdentifier = "ID3";
+
+	constexpr std::string sTagIdentifier = "ID3";
 	const unsigned long headerBytesMustBeLessThan[] =
 	{
 		static_cast<unsigned long>(sTagIdentifier[0] + 1),
@@ -67,7 +67,7 @@ Id3v2Tag * Id3v2Tag::Check(const CheckParameters& rParams)
 	};
 
 	//TODO Check the TLEN time is correct
-	const unsigned int headerBytesMustBeLessThanSize = sizeof(headerBytesMustBeLessThan) / sizeof(unsigned long);
+	constexpr unsigned int headerBytesMustBeLessThanSize = sizeof(headerBytesMustBeLessThan) / sizeof(unsigned long);
 	if(mp3FileBuffer.CanRead(sTagIdentifier.size() + headerBytesMustBeLessThanSize))
 	{
 		if(mp3FileBuffer.DoesSay(sTagIdentifier))

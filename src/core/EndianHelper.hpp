@@ -19,8 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#ifndef ENDIANHELPER_H
-#define ENDIANHELPER_H
+#ifndef ENDIANHELPER_HPP
+#define ENDIANHELPER_HPP
 
 #include <cstdint>
 #include <vector>
@@ -66,4 +66,4 @@ namespace EndianHelper
 	}
 }
 
-#endif // ENDIANHELPER_H
+#endif

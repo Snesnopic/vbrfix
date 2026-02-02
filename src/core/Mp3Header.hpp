@@ -19,8 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#ifndef MP3HEADER_H
-#define MP3HEADER_H
+#ifndef MP3HEADER_HPP
+#define MP3HEADER_HPP
 #include <cstdint>
 
 class Mp3Header
@@ -42,31 +42,31 @@ class Mp3Header
 			HEADER_SIZE_IN_BYTES = 4
 		};
 		
-		Mp3Header(_ul32 header);
+		explicit Mp3Header(_ul32 header);
 		Mp3Header(const Mp3Header& rOther);
-		bool IsValid() const;
-		MpegVersion GetMpegVersion() const;
-		MpegLayerVersion GetLayerVersion() const;
-		int GetBitRate() const;
-		int GetKBitRate() const;
-		int GetSampleFrequency() const;
-		int GetFrameSize() const;
+		[[nodiscard]] bool IsValid() const;
+		[[nodiscard]] MpegVersion GetMpegVersion() const;
+		[[nodiscard]] MpegLayerVersion GetLayerVersion() const;
+		[[nodiscard]] int GetBitRate() const;
+		[[nodiscard]] int GetKBitRate() const;
+		[[nodiscard]] int GetSampleFrequency() const;
+		[[nodiscard]] int GetFrameSize() const;
 
-		bool IsProtectedByCrc() const;
-		bool IsPadded() const;
-		bool IsPrivate() const;
-		bool IsCopyRighted() const;
-		bool IsOriginal() const;
-		bool IsFreeBitrate() const;
+		[[nodiscard]] bool IsProtectedByCrc() const;
+		[[nodiscard]] bool IsPadded() const;
+		[[nodiscard]] bool IsPrivate() const;
+		[[nodiscard]] bool IsCopyRighted() const;
+		[[nodiscard]] bool IsOriginal() const;
+		[[nodiscard]] bool IsFreeBitrate() const;
 
-		ChannelMode GetChannelMode() const;
-		ModeExtension GetModeExtension() const; // layer I & II only
-		bool IsModeExtIntensityStereo() const; // layer III only
-		bool IsModeExtMsStereo() const; // layer III only
+		[[nodiscard]] ChannelMode GetChannelMode() const;
+		[[nodiscard]] ModeExtension GetModeExtension() const; // layer I & II only
+		[[nodiscard]] bool IsModeExtIntensityStereo() const; // layer III only
+		[[nodiscard]] bool IsModeExtMsStereo() const; // layer III only
 
-		Emphasis GetEmphasis() const;
+		[[nodiscard]] Emphasis GetEmphasis() const;
 
-		_ul32 GetHeader() const {return m_Header;}
+		[[nodiscard]] _ul32 GetHeader() const {return m_Header;}
 
 		bool IncreaseBitrate();
 		
@@ -81,8 +81,8 @@ class Mp3Header
 		enum {HEADER_BITS = 32};
 		_ul32 m_Header;
 
-		int GetSizeCoef2() const;
-		int GetSizeCoef1() const;
+		[[nodiscard]] int GetSizeCoef2() const;
+		[[nodiscard]] int GetSizeCoef1() const;
 };
 
 #endif

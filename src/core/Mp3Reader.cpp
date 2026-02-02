@@ -19,17 +19,17 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#include "Mp3Reader.h"
-#include "Mp3FileObjectChecker.h"
-#include "Mp3FileObject.h"
-#include "Mp3Frame.h"
-#include "Mp3Header.h"
-#include "FeedBackInterface.h"
-#include "FileBuffer.h"
-#include "UnknownDataObject.h"
-#include "Id3Tags.h"
-#include "ApeTag.h"
-#include "LyricsTag.h"
+#include "Mp3Reader.hpp"
+#include "Mp3FileObjectChecker.hpp"
+#include "Mp3FileObject.hpp"
+#include "Mp3Frame.hpp"
+#include "Mp3Header.hpp"
+#include "FeedBackInterface.hpp"
+#include "FileBuffer.hpp"
+#include "UnknownDataObject.hpp"
+#include "Id3Tags.hpp"
+#include "ApeTag.hpp"
+#include "LyricsTag.hpp"
 #include <sstream>
 #include <cassert>
 #include <algorithm>
@@ -62,8 +62,8 @@ Mp3Reader::Mp3Reader(FileBuffer & mp3FileBuffer, FeedBackInterface &feedBack, Re
 
 Mp3Reader::~Mp3Reader()
 {
-	std::for_each(m_Mp3Objects.begin(), m_Mp3Objects.end(), SDelete());
-	std::for_each(m_ObjectCheckers.begin(), m_ObjectCheckers.end(), SDelete());
+	std::ranges::for_each(m_Mp3Objects, SDelete());
+	std::ranges::for_each(m_ObjectCheckers, SDelete());
 }
 
 void Mp3Reader::CheckForUnknownData()
@@ -98,17 +98,17 @@ void Mp3Reader::CheckForUnknownData()
 
 bool Mp3Reader::ReadMp3( )
 {
-	bool bOk = true;
+	constexpr bool bOk = true;
 	const unsigned long FileSize = m_rMp3FileBuffer.GetLength();
 	m_rProgessDetails.setFileSize( FileSize);
 	while(m_rMp3FileBuffer.isDataLeft() && !m_rFeedBack.HasUserCancelled())
 	{
 		Mp3Object *pFoundObject = nullptr;
-		for(ObjectCheckerList::const_iterator iter = m_ObjectCheckers.begin(); iter != m_ObjectCheckers.end(); ++iter)
+		for(const auto& m_ObjectChecker : m_ObjectCheckers)
 		{
 			// can we identify the object at the position in the filebuffer
 			CheckParameters params(m_rMp3FileBuffer, m_rFeedBack, m_readSettings);
-			pFoundObject = (*iter)->Check(params);
+			pFoundObject = m_ObjectChecker->Check(params);
 			if(pFoundObject)
 			{
 				m_rProgessDetails.foundObject(pFoundObject);
@@ -158,7 +158,7 @@ void Mp3Reader::ReadProgressDetails::foundObject( const Mp3Object * object )
 	if(eType.IsTypeOfFrame())
 	{
 		m_iFrames ++;
-		const Mp3Frame * pFrame = static_cast<const Mp3Frame* >(object);
+		const Mp3Frame * pFrame = dynamic_cast<const Mp3Frame* >(object);
 		const int bitrate = pFrame->GetMp3Header().GetKBitRate();
 		m_TotalBitrate += bitrate;
 		if(m_iFrames > 1) // we need more than one frame for vbr

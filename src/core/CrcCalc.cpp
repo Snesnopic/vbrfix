@@ -21,7 +21,7 @@
 
 // Note this code was adapted from code examples found on newsgroups / the internet
 
-#include "CrcCalc.h"
+#include "CrcCalc.hpp"
 
 #include <vector>
 

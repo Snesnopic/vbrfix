@@ -19,14 +19,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#include "XingFrame.h"
+#include "XingFrame.hpp"
 #include <deque>
-#include "Mp3Header.h"
-#include "EndianHelper.h"
-#include "FileBuffer.h"
-#include "FeedBackInterface.h"
-#include "FixerSettings.h"
-#include "CrcCalc.h"
+#include "Mp3Header.hpp"
+#include "EndianHelper.hpp"
+#include "FileBuffer.hpp"
+#include "FeedBackInterface.hpp"
+#include "FixerSettings.hpp"
+#include "CrcCalc.hpp"
 #include <cmath>
 #include <iostream>
 #include <iterator>
@@ -41,7 +41,7 @@ namespace
 
 	constexpr unsigned int HEADER_BYTES = 4;
 	constexpr int INVALID_XING_OFFSET = -1;
-	
+
 	constexpr int maxLameBodySize = 208;
 	constexpr int lameHeadSize = 20;
 
@@ -93,31 +93,31 @@ namespace
 	void AddAsBigEndian(std::deque<unsigned char> &collection, unsigned long uData)
 	{
 		std::vector<unsigned char> bytes = EndianHelper::ConvertToBigEndianBytes(uData);
-		collection.insert(collection.end(), bytes.begin(), bytes.end());		
+		collection.insert(collection.end(), bytes.begin(), bytes.end());
 	}
-	
+
 	unsigned long CalculateFrameCrc(int sideInfoLen, const std::deque<unsigned char> &frameData)
 	{
 		int crc = 0xffff;
 		crc = CrcHelper::CrcMp3FrameUpdate(frameData[2], crc);
 		crc = CrcHelper::CrcMp3FrameUpdate(frameData[3], crc);
-		for (int i = 6; i < sideInfoLen; i++) 
+		for (int i = 6; i < sideInfoLen; i++)
 		{
 			crc = CrcHelper::CrcMp3FrameUpdate(frameData[i], crc);
 		}
-		
+
 		return crc;
 	}
 
 }
 
-void XingFrame::writeToFile( FileBuffer & originalFile, std::ofstream & rOutFile ) const
+void XingFrame::write(const FileBuffer & originalFile, std::ostream & rOutFile) const
 {
 	std::deque<unsigned char> buffer;
 
 	if(IsFromFile())
 	{
-		return Mp3Frame::writeToFile(originalFile, rOutFile);
+		return Mp3Frame::write(originalFile, rOutFile);
 	}
 	using namespace EndianHelper;
 	const int iXingOffset = GetXingHeaderOffset(m_Header);
@@ -132,9 +132,9 @@ void XingFrame::writeToFile( FileBuffer & originalFile, std::ofstream & rOutFile
 	AddAsBigEndian(buffer, m_StreamSize);
 	assert(TOC_SIZE == m_Toc.size());
 	buffer.insert(buffer.end(), m_Toc.begin(), m_Toc.end());
-	
+
 	AddAsBigEndian(buffer, m_VbrScale);
-	
+
 	// frame crc if crc is on
 	if(m_Header.IsProtectedByCrc())
 	{
@@ -156,9 +156,9 @@ void XingFrame::writeToFile( FileBuffer & originalFile, std::ofstream & rOutFile
 	if(HasLameInfo())
 	{
 		const unsigned long lamePos = buffer.size();
-		
+
 		const unsigned long iCrcPos = lamePos +  0xBE - 0x9C;
-		
+
 		// Lame Info
 
 		buffer.insert(buffer.end(), m_LameData.begin(), m_LameData.end());
@@ -175,7 +175,7 @@ void XingFrame::writeToFile( FileBuffer & originalFile, std::ofstream & rOutFile
 			{
 				throw "Error Caclulation Lame Music CRC";
 			}
-			
+
 			buffer[iCrcPos - 2] = bigEndian[2];
 			buffer[iCrcPos - 1] = bigEndian[3];
 		}
@@ -186,7 +186,7 @@ void XingFrame::writeToFile( FileBuffer & originalFile, std::ofstream & rOutFile
 			{
 				throw "This type of Lame Info is unsupported, Recalculation of LameCrc cannot be performed. Try turrning off Lame CRC recalculation or logging a bug.";
 			}
-			
+
 			// Calculate the CRC
 			assert(buffer.size() >= iCrcPos);
 			if(buffer.size() < iCrcPos)
@@ -205,12 +205,12 @@ void XingFrame::writeToFile( FileBuffer & originalFile, std::ofstream & rOutFile
 			{
 				throw "Error Caclulation Lame CRC";
 			}
-			
+
 			buffer[iCrcPos] = bigEndian[2];
 			buffer[iCrcPos + 1] = bigEndian[3];
 		}
 	}
-	
+
 	// rest of space of frame
 	if(size() < buffer.size())
 	{
@@ -218,7 +218,7 @@ void XingFrame::writeToFile( FileBuffer & originalFile, std::ofstream & rOutFile
 	}
 	const unsigned long iRest = size() - buffer.size();
 	buffer.insert(buffer.end(), iRest, '\0');
-	
+
 	std::copy(buffer.begin(), buffer.end(), std::ostream_iterator<unsigned char>(rOutFile));
 }
 
@@ -239,7 +239,7 @@ void XingFrame::Setup(const Mp3ObjectList & finalObjectList, const XingFrame* pO
 {
 	// Xing Flags
 	m_Flags = FRAMES_FLAG | BYTES_FLAG | TOC_FLAG;
-	
+
 	if(pOriginalFrame)
 	{
 		if(pOriginalFrame->m_Flags & VBR_SCALE_FLAG) // only do scale if it existed previously
@@ -268,7 +268,7 @@ void XingFrame::Setup(const Mp3ObjectList & finalObjectList, const XingFrame* pO
 							mp3FileBuffer.setPosition((*iter)->getOldFilePosition());
 							// TODO progress? This takes some time
 							mp3FileBuffer[(*iter)->size() - 1]; // speed up the buffering
-								
+
 							for(unsigned long iByte = 0; iByte < (*iter)->size(); ++iByte)
 							{
 								const int val = mp3FileBuffer[iByte];
@@ -282,19 +282,19 @@ void XingFrame::Setup(const Mp3ObjectList & finalObjectList, const XingFrame* pO
 			}
 		}
 	}
-	
+
 	if(GetMp3Header().IsProtectedByCrc())
 	{
 		bool bRemoveCrc = false;
 		switch(rFixerSettings.GetXingFrameCrcOption())
 		{
-			case FixerSettings::CRC_REMOVE: 
-				bRemoveCrc = true; 
+			case FixerSettings::CRC_REMOVE:
+				bRemoveCrc = true;
 				break;
 			case FixerSettings::CRC_KEEP_IF_CAN:
 				bRemoveCrc = !IsCrcUpdateSupported(GetMp3Header());
 				break;
-			case FixerSettings::CRC_KEEP: 
+			case FixerSettings::CRC_KEEP:
 				break;
 		}
 
@@ -303,22 +303,22 @@ void XingFrame::Setup(const Mp3ObjectList & finalObjectList, const XingFrame* pO
 			GetMp3Header().RemoveCrcProtection();
 		}
 	}
-	
+
 
 	unsigned int minSize = GetXingHeaderOffset(m_Header) + XING_DATA_SIZE;
 	if(HasLameInfo()) minSize += m_LameData.size();
-	
-	// make sure the frame is big enough 
+
+	// make sure the frame is big enough
 	while(size() < minSize)
 	{
 		if(!m_Header.IncreaseBitrate())
 			throw ("Can't create an Xing Header Big enough to encapsulate the data");
 	}
-	
+
 	typedef std::deque<unsigned long> FramePositions;
 	FramePositions framePositions;
 	unsigned long iNewStreamSize = 0;
-	
+
 	// count frames
 	for(Mp3ObjectList::const_iterator iter = finalObjectList.begin(); iter != finalObjectList.end(); ++iter)
 	{
@@ -374,7 +374,7 @@ bool XingFrame::isOriginalCorrect(const XingFrame* originalFrame)
 XingFrame * XingFrame::Check(CheckParameters & rParams)
 {
 	const FileBuffer& mp3FileBuffer(rParams.m_mp3FileBuffer);
-	
+
 	// must be called from Mp3Frame::Check() or the Mp3Header might not have been verified and things like that`
 	Mp3Header header(mp3FileBuffer.GetFromBigEndianToNative());
 	const int iXingHeaderPos = GetXingHeaderOffset(header);
@@ -396,7 +396,7 @@ XingFrame * XingFrame::Check(CheckParameters & rParams)
 		if(bContainsLameInfo)
 		{
 			const int lameLength = (header.GetFrameSize() - uLamePosition);
-			
+
 			std::vector< unsigned char > lameInfo(lameLength);
 			for(int i = 0 ; i < lameLength; ++i)
 			{
@@ -405,14 +405,14 @@ XingFrame * XingFrame::Check(CheckParameters & rParams)
 			const int maxLameSize = (maxLameBodySize + lameHeadSize);
 			for(int i = maxLameSize; i < lameLength; ++i)
 			{
-				if(lameInfo[i] != 0) 
+				if(lameInfo[i] != 0)
 					throw "Unexpectedly long LAME info tag";
 			}
 
 			pNewFrame->SetLameData(lameInfo);
 		}
 		int iQualPos = iXingHeaderPos + XingIdentifier.size() + sizeof(uXingFlags);
-		if(uXingFlags & FRAMES_FLAG) 
+		if(uXingFlags & FRAMES_FLAG)
 		{
 			pNewFrame->m_FrameCount = mp3FileBuffer.GetFromBigEndianToNative(iQualPos);
 			iQualPos += HEADER_BYTES;
@@ -436,7 +436,7 @@ XingFrame * XingFrame::Check(CheckParameters & rParams)
 		std::string sMsg = "Found Xing Header Frame";
 		if(bContainsLameInfo) sMsg += " with LAME info";
 		rParams.m_feedBack.addLogMessage( Log::LOG_INFO, sMsg);
-		
+
 		return pNewFrame;
 	}
 	return nullptr;

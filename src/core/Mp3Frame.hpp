@@ -19,30 +19,36 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#ifndef COMMANDREADER_H
-#define COMMANDREADER_H
+#ifndef MP3FRAME_HPP
+#define MP3FRAME_HPP
 
-#include <list>
-#include <string>
+#include "Mp3FileObject.hpp"
+#include <memory>
+#include "Mp3Header.hpp"
 
-class CommandReader
+class Mp3Header;
+
+class Mp3Frame : public Mp3Object
 {
 	public:
-		typedef std::list < std::string > OptionList;
-		typedef std::list < std::string > ParameterList;
-		typedef std::list < std::string > ArgList;
-		CommandReader(const ArgList& originalargs);
+		
+		explicit Mp3Frame(const Mp3Header &header);
+		~Mp3Frame() override;
 
-		virtual ~CommandReader();
+		static Mp3Frame* Check(CheckParameters & rParams);
 
-		[[nodiscard]] const OptionList& GetOptionList() const {return m_Options;}
-		[[nodiscard]] const ParameterList& GetParameterList() const {return m_Parameters;}
+		[[nodiscard]] unsigned long size() const override;
 
-	private:
-		ParameterList m_Parameters;
-		OptionList m_Options;
-		std::string m_ProgramName;
-		void ProcessArg(const std::string & arg);
+		[[nodiscard]] Mp3ObjectType GetObjectType() const override {return Mp3ObjectType(Mp3ObjectType::FRAME);}
+
+		[[nodiscard]] const Mp3Header& GetMp3Header() const;
+		Mp3Header& GetMp3Header();
+
+		[[nodiscard]] virtual bool HasLameInfo() const {return false;} // this could change if we handle the info tag
+		
+	protected:
+		Mp3Frame(unsigned long oldFilePosition, const Mp3Header &header);
+		Mp3Header m_Header;
 
 };
 

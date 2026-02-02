@@ -19,7 +19,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#include "CommandReader.h"
+#include "CommandReader.hpp"
 #include <cassert>
 
 namespace
@@ -36,7 +36,6 @@ CommandReader::CommandReader(const ArgList& originalArgs)
 		{
 			throw ("Unexpected program arguments");
 		}
-		m_ProgramName = args.front();
 		args.pop_front();
 	}
 	for(const auto & arg : args)

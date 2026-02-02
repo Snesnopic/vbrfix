@@ -19,7 +19,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#include "ReadSettings.h"
+#include "ReadSettings.hpp"
 
 ReadSettings::ReadSettings()
 	: m_bTreatFreeFormatFramesAsUnknownData(false)

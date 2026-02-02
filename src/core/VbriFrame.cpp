@@ -19,9 +19,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#include "VbriFrame.h"
+#include "VbriFrame.hpp"
 #include <cassert>
-#include "FileBuffer.h"
+#include "FileBuffer.hpp"
 
 VbriFrame::VbriFrame(const Mp3Header & header)
 	: Mp3Frame(header)

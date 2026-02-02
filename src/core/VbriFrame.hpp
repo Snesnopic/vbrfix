@@ -1,5 +1,5 @@
 /*//////////////////////////////////////////////////////////////////////////////////
-// copyright : (C) 2009  by William Pye
+// copyright : (C) 2006  by William Pye
 // contact   : www.willwap.co.uk
 ///////////////////////////////////////////////////////////////////////////////////
 //
@@ -19,24 +19,23 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#ifndef LYRICSTAG_H
-#define LYRICSTAG_H
+#ifndef VBRIFRAME_HPP
+#define VBRIFRAME_HPP
 
-#include "Mp3FileObject.h"
+#include "Mp3Frame.hpp"
 
-class Lyrics3Tag : public Mp3Object
+class VbriFrame : public Mp3Frame
 {
 	public:
-		~Lyrics3Tag() override;
-		static Lyrics3Tag* Check(const CheckParameters & rParams);
-
-		[[nodiscard]] unsigned long size() const override;
-		[[nodiscard]] Mp3ObjectType GetObjectType() const override {return Mp3ObjectType(Mp3ObjectType::LYRICS_TAG);}
+		explicit VbriFrame(const Mp3Header & header);
+		
+		[[nodiscard]] Mp3ObjectType GetObjectType() const override {return Mp3ObjectType(Mp3ObjectType::VBRI_FRAME);}
+		
+		static VbriFrame * Check(CheckParameters & rParams);
+		
+		~VbriFrame() override;
 	protected:
-		Lyrics3Tag(unsigned long oldFilePosition, unsigned long Size);
-
-	private:
-		const unsigned long m_Size;
+		VbriFrame(unsigned long oldFilePosition, const Mp3Header &header);
 };
 
 #endif

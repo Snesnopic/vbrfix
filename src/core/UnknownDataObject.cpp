@@ -19,7 +19,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#include "UnknownDataObject.h"
+#include "UnknownDataObject.hpp"
 
 UnknownDataObject::UnknownDataObject(const unsigned long oldFilePosition, const unsigned long size)
 	: Mp3Object(oldFilePosition)

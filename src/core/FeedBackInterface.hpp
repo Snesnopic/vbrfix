@@ -19,36 +19,46 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#ifndef CONSOLEFIXER_H
-#define CONSOLEFIXER_H
+#ifndef FEEDBACKINTERFACE_HPP
+#define FEEDBACKINTERFACE_HPP
 
-#include <list>
+#include "Mp3FileObject.hpp"
 #include <string>
+#include <utility>
 
-#include "FeedBackInterface.h"
-#include "CommandReader.h"
+namespace Log
+{
+	enum Importance{LOG_DETAIL, LOG_INFO, LOG_WARNING, LOG_ERROR};
+	class LogItem
+	{
+		public:
+			[[nodiscard]] std::string GetText() const {return m_Text;}
+			[[nodiscard]] Importance GetImportance() const {return m_Importance;}
+			LogItem() = default;
+			LogItem(const Importance importance, std::string sText)
+				: m_Text(std::move(sText)) , m_Importance(importance){}
+		private:
+			std::string m_Text;
+			Importance m_Importance;
+	};
+}
 
-class FixerSettings;
-
-class ConsoleFixer : public FeedBackInterface
+class FeedBackInterface
 {
 	public:
-		typedef std::list< std::string > CommandList;
-		ConsoleFixer(const CommandList& args);
+		FeedBackInterface() = default;
 
-		~ConsoleFixer() override;
+		virtual ~FeedBackInterface() = default;
 
-		bool Run();
+		virtual void update() = 0;
 
-		void update() override {}
+		virtual void addLogMessage(Log::LogItem log) = 0;
+		void addLogMessage(const Log::Importance i, const std::string& text)
+		{
+			addLogMessage(Log::LogItem(i, text));
+		}
 
-		void addLogMessage(Log::LogItem sMsg) override;
-
-		[[nodiscard]] bool HasUserCancelled() const override {return false;}
-	private:
-		const CommandList& m_Args;
-
-		bool GetFixerSettingsFromOptions(FixerSettings & settings, const CommandReader::OptionList& optionList);
+		[[nodiscard]] virtual bool HasUserCancelled() const = 0;
 };
 
 #endif

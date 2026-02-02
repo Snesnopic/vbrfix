@@ -19,9 +19,23 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
+#ifndef UNKNOWNDATAOBJECT_HPP
+#define UNKNOWNDATAOBJECT_HPP
 
-namespace CrcHelper
+#include "Mp3FileObject.hpp"
+
+class UnknownDataObject : public Mp3Object
 {
-	int CRC_update_lookup(int value, int crc);
-	int CrcMp3FrameUpdate(int value, int crc);
-}
+	public:
+		UnknownDataObject(unsigned long oldFilePosition, unsigned long size);
+		~UnknownDataObject() override;
+
+		[[nodiscard]] unsigned long size() const override;
+
+		[[nodiscard]] Mp3ObjectType GetObjectType() const override {return Mp3ObjectType(Mp3ObjectType::UNKNOWN_DATA);}
+	private:
+		unsigned long m_Size;
+
+};
+
+#endif

@@ -19,23 +19,24 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#ifndef UNKNOWNDATAOBJECT_H
-#define UNKNOWNDATAOBJECT_H
+#ifndef APETAG_HPP
+#define APETAG_HPP
 
-#include "Mp3FileObject.h"
+#include "Mp3FileObject.hpp"
 
-class UnknownDataObject : public Mp3Object
+class ApeTag : public Mp3Object
 {
 	public:
-		UnknownDataObject(unsigned long oldFilePosition, unsigned long size);
-		~UnknownDataObject() override;
+		~ApeTag() override;
+		static ApeTag* Check(const CheckParameters & rParams);
 
 		[[nodiscard]] unsigned long size() const override;
+		[[nodiscard]] Mp3ObjectType GetObjectType() const override {return Mp3ObjectType(Mp3ObjectType::APE_TAG);}
+	protected:
+		ApeTag(unsigned long oldFilePosition, unsigned long Size);
 
-		[[nodiscard]] Mp3ObjectType GetObjectType() const override {return Mp3ObjectType(Mp3ObjectType::UNKNOWN_DATA);}
 	private:
-		unsigned long m_Size;
-
+		const unsigned long m_Size;
 };
 
 #endif

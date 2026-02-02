@@ -19,113 +19,113 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#include "Mp3FileObject.h"
-#include "FileBuffer.h"
-#include "GenHelpers.h"
+#include "Mp3FileObject.hpp"
+#include "FileBuffer.hpp"
 #include <algorithm>
 #include <functional>
 #include <cassert>
-#include <fstream>
+#include <ostream>
+#include <vector>
 
-void Mp3Object::writeToFile( FileBuffer & originalFile, std::ofstream & rOutFile ) const
+void Mp3Object::write(const FileBuffer & originalFile, std::ostream & rOutStream) const
 {
 	assert(IsFromFile());
 	if(IsFromFile())
 	{
-		const unsigned long iObjectSize = size();
-		const unsigned long iObjectStartPos = getOldFilePosition();
-		unsigned char* buffer = new unsigned char[iObjectSize];
-		ArrayDeleter<unsigned char> cleanUpArray(buffer); // will delete the array when it goes out of scope
+		const size_t iObjectSize = size();
+		const size_t iObjectStartPos = getOldFilePosition();
+
+		std::vector<unsigned char> buffer(iObjectSize);
+
 		originalFile.setPosition(iObjectStartPos);
-		originalFile.readIntoBuffer(buffer, iObjectSize);
-		rOutFile.write(reinterpret_cast<char*>(buffer), iObjectSize);
+		originalFile.readIntoBuffer(buffer.data(), iObjectSize);
+
+		rOutStream.write(reinterpret_cast<const char*>(buffer.data()), iObjectSize);
 	}
 }
 
-Mp3Object::Mp3Object( )
+Mp3Object::Mp3Object()
 	: m_IsFromFile(false)
 	, m_OldFilePosition(0)
 {
 }
 
-Mp3Object::Mp3Object( unsigned long iFromFilePosition )
+Mp3Object::Mp3Object(const unsigned long iFromFilePosition)
 	: m_IsFromFile(true)
 	, m_OldFilePosition(iFromFilePosition)
 {
 }
 
-bool Mp3Object::IsFromFile( ) const
+bool Mp3Object::IsFromFile() const
 {
 	return m_IsFromFile;
 }
 
-unsigned long Mp3Object::getOldFilePosition( ) const
+unsigned long Mp3Object::getOldFilePosition() const
 {
 	assert(IsFromFile());
 	return m_OldFilePosition;
 }
 
-unsigned long Mp3Object::getOldEndOfObjectFilePosition( ) const
+unsigned long Mp3Object::getOldEndOfObjectFilePosition() const
 {
 	return getOldFilePosition() + size();
 }
 
-Mp3Object::~ Mp3Object( )
-{
-}
+Mp3Object::~Mp3Object() = default;
 
-bool Mp3ObjectType::operator < ( const Mp3ObjectType & rOther ) const
+bool Mp3ObjectType::operator<(const Mp3ObjectType & rOther) const
 {
 	return m_Type < rOther.m_Type;
 }
 
-Mp3ObjectType::Mp3ObjectType( ObjectId type )
+Mp3ObjectType::Mp3ObjectType(const ObjectId type)
 	: m_Type(type)
 {
 }
 
-bool Mp3ObjectType::IsTypeOfFrame( ) const
+bool Mp3ObjectType::IsTypeOfFrame() const
 {
 	return (m_Type == FRAME || m_Type == XING_FRAME || m_Type == VBRI_FRAME);
 }
 
-bool Mp3ObjectType::IsTypeOfTag( ) const
+bool Mp3ObjectType::IsTypeOfTag() const
 {
 	return (m_Type == ID3V1_TAG || m_Type == ID3V2_TAG || m_Type == APE_TAG || m_Type == LYRICS_TAG);
 }
 
-bool Mp3ObjectType::IsUnknown( ) const
+bool Mp3ObjectType::IsUnknown() const
 {
 	return (m_Type == UNKNOWN_DATA);
 }
 
-const Mp3ObjectType::Set & Mp3ObjectType::GetFrameTypes( )
+const Mp3ObjectType::Set & Mp3ObjectType::GetFrameTypes()
 {
 	static Set types;
 	if(types.empty())
 	{
 		const Set& allTypes = GetTypes();
-		std::copy_if(allTypes.begin(), allTypes.end(),
-					 inserter(types, types.begin()),
-					 [](const Mp3ObjectType& obj){ return obj.IsTypeOfFrame(); });
+		std::ranges::copy_if(allTypes,
+		                     std::inserter(types, types.begin()),
+		                     [](const Mp3ObjectType& obj){ return obj.IsTypeOfFrame(); });
 	}
 	return types;
 }
 
-const Mp3ObjectType::Set & Mp3ObjectType::GetTagTypes( )
+const Mp3ObjectType::Set & Mp3ObjectType::GetTagTypes()
 {
 	static Set types;
 	if(types.empty())
 	{
 		const Set& allTypes = GetTypes();
-		std::copy_if(allTypes.begin(), allTypes.end(),
-					 inserter(types, types.begin()),
-					 [](const Mp3ObjectType& obj){ return obj.IsTypeOfTag(); });
+		std::ranges::copy_if(allTypes,
+		                     std::inserter(types, types.begin()),
+		                     [](const Mp3ObjectType& obj){ return obj.IsTypeOfTag(); });
 	}
 	return types;
 }
 
-const Mp3ObjectType::Set & Mp3ObjectType::GetTypes( )
+const Mp3ObjectType::Set & Mp3ObjectType::GetTypes()
 {
 	static Set types;
 	if(types.empty())

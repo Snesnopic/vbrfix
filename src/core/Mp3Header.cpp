@@ -19,10 +19,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#include "Mp3Header.h"
+#include "Mp3Header.hpp"
 #include <assert.h>
 
-#include "BitReader.h"
+#include "BitReader.hpp"
 
 // TODO Allowed Modes
 

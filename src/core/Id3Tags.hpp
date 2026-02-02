@@ -19,19 +19,40 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#ifndef GEN_HELPERS_H
-#define GEN_HELPERS_H
+#ifndef ID3V1TAG_HPP
+#define ID3V1TAG_HPP
 
-template <typename T>
-class ArrayDeleter
+#include "Mp3FileObject.hpp"
+
+class Id3v1Tag : public Mp3Object
 {
-	T* m_array;
+	private:
+		enum {ID3V1_TAG_SIZE = 128};
 	public:
-		explicit ArrayDeleter(T* array) : m_array(array) {};
-		~ArrayDeleter()
-		{
-			delete[] m_array;
-		}
+		~Id3v1Tag() override;
+		static Id3v1Tag* Check(const CheckParameters & rParams);
+
+		[[nodiscard]] unsigned long size() const override {return ID3V1_TAG_SIZE;}
+		[[nodiscard]] Mp3ObjectType GetObjectType() const override {return Mp3ObjectType(Mp3ObjectType::ID3V1_TAG);}
+	protected:
+		explicit Id3v1Tag(unsigned long oldFilePosition);
+
+};
+
+class Id3v2Tag : public Mp3Object
+{
+	public:
+		~Id3v2Tag() override;
+		static Id3v2Tag* Check(const CheckParameters & rParams);
+
+		[[nodiscard]] unsigned long size() const override;
+		[[nodiscard]] Mp3ObjectType GetObjectType() const override {return Mp3ObjectType(Mp3ObjectType::ID3V2_TAG);}
+	protected:
+		Id3v2Tag(unsigned long oldFilePosition, unsigned long Size);
+		
+	private:
+		const unsigned long m_Size;
+
 };
 
 #endif

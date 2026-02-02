@@ -19,10 +19,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#include "ApeTag.h"
-#include "FeedBackInterface.h"
-#include "FileBuffer.h"
-#include "BitReader.h"
+#include "ApeTag.hpp"
+#include "FeedBackInterface.hpp"
+#include "FileBuffer.hpp"
+#include "BitReader.hpp"
 #include <string>
 #include <cassert>
 

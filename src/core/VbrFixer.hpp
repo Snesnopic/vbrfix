@@ -19,11 +19,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#ifndef VBRFIXER_H
-#define VBRFIXER_H
+#ifndef VBRFIXER_HPP
+#define VBRFIXER_HPP
 
 #include <string>
-#include "Mp3Reader.h"
+#include <memory>
+#include <ostream>
+#include "Mp3Reader.hpp"
+#include "IDataSource.hpp"
 
 class FeedBackInterface; class FixerSettings;
 
@@ -34,39 +37,39 @@ namespace FixState
 
 class VbrFixer
 {
+public:
+	class ProgressDetails : public Mp3Reader::ReadProgressDetails
+	{
 	public:
-		class ProgressDetails : public Mp3Reader::ReadProgressDetails
-		{
-			public:
-				ProgressDetails();
-				[[nodiscard]] int GetTotalPercent() const;
-				[[nodiscard]] FixState::State GetState() const;
-				void SetState(FixState::State eState);
+		ProgressDetails();
+		[[nodiscard]] int GetTotalPercent() const;
+		[[nodiscard]] FixState::State GetState() const;
+		void SetState(FixState::State eState);
 
-				void setPercentOfProcessing(int iPer){m_iPercentOfProcessing = iPer;}
-				void setPercentOfWriting(int iPer){m_iPercentOfWrite = iPer;}
-			private:
-				int m_iPercentOfWrite;
-				int m_iPercentOfProcessing;
-				FixState::State m_eState;
-		};
-		
-		VbrFixer(FeedBackInterface & rFeedBackInterface, const FixerSettings & fixerSettings);
-		virtual ~VbrFixer();
-
-		void Fix(const std::string &sInFileName, const std::string &sOutFileName);
-
-		[[nodiscard]] const ProgressDetails & GetProgressDetails() const {return m_ProgressDetails;}
-		
-		static std::string GetFixerVersion();
-
+		void setPercentOfProcessing(int iPer){m_iPercentOfProcessing = iPer;}
+		void setPercentOfWriting(int iPer){m_iPercentOfWrite = iPer;}
 	private:
-		FeedBackInterface & m_rFeedBackInterface;
-		const FixerSettings &m_rFixerSettings;
+		int m_iPercentOfWrite;
+		int m_iPercentOfProcessing;
+		FixState::State m_eState;
+	};
 
-		ProgressDetails m_ProgressDetails;
+	VbrFixer(FeedBackInterface & rFeedBackInterface, const FixerSettings & fixerSettings);
+	virtual ~VbrFixer();
 
-		[[nodiscard]] bool ShouldSkipMp3(const Mp3Reader::ConstMp3ObjectList &frames) const;
+	void Fix(std::unique_ptr<IDataSource> pSource, std::ostream & output);
+
+	[[nodiscard]] const ProgressDetails & GetProgressDetails() const {return m_ProgressDetails;}
+
+	static std::string GetFixerVersion();
+
+private:
+	FeedBackInterface & m_rFeedBackInterface;
+	const FixerSettings &m_rFixerSettings;
+
+	ProgressDetails m_ProgressDetails;
+
+	[[nodiscard]] bool ShouldSkipMp3(const Mp3Reader::ConstMp3ObjectList &frames) const;
 };
 
 #endif

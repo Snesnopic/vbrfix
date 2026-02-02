@@ -19,15 +19,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#include "VbrFixer.h"
-#include "Mp3Reader.h"
-#include "Mp3Header.h"
-#include "FileBuffer.h"
-#include "Mp3FileObject.h"
-#include "FeedBackInterface.h"
-#include "FixerSettings.h"
-#include "XingFrame.h"
-#include <fstream>
+#include "VbrFixer.hpp"
+#include "Mp3Reader.hpp"
+#include "Mp3Header.hpp"
+#include "FileBuffer.hpp"
+#include "Mp3FileObject.hpp"
+#include "FeedBackInterface.hpp"
+#include "FixerSettings.hpp"
+#include "XingFrame.hpp"
 #include <memory>
 #include <sstream>
 #include <cassert>
@@ -42,11 +41,11 @@ namespace
 			Mp3ObjectType::Set m_IntTypes;
 		public:
 			bool operator () (const Mp3Object *pObject) const {
-				return (m_Types.find(pObject->GetObjectType()) != m_Types.end());
+				return (m_Types.contains(pObject->GetObjectType()));
 			}
 			explicit IsOfMp3ObjectType(const Mp3ObjectType::Set& types)
 				: m_Types(types) {}
-				
+
 			explicit IsOfMp3ObjectType(const Mp3ObjectType::ObjectId type)
 				: m_Types(m_IntTypes)
 			{
@@ -77,21 +76,20 @@ VbrFixer::VbrFixer( FeedBackInterface & rFeedBackInterface, const FixerSettings 
 {
 }
 
-
 VbrFixer::~VbrFixer() = default;
 
 struct ConsistencyChecker
 {
 	ConsistencyChecker() : mostPopularFrameHeader(0){}
 	Mp3Header mostPopularFrameHeader;
-	
+
 	void workOn(Mp3Reader::ConstMp3ObjectList& objects, bool remove, FeedBackInterface & feedBack)
 	{
 		threshold = objects.size() / 100;
 		readMode = true;
 		for(const auto & object : objects)
 			(*this)(object);
-		
+
 		std::stringstream headersText; headersText << "Found MP3 headers: ";
 		int maxCount = 0;
 		for(auto & header : headers)
@@ -146,16 +144,14 @@ struct ConsistencyChecker
 	}
 };
 
-void VbrFixer::Fix( const std::string & sInFileName, const std::string & sOutFileName )
+void VbrFixer::Fix(std::unique_ptr<IDataSource> pSource, std::ostream & output)
 {
 	try
 	{
-		std::stringstream ss;
-		ss << "Starting Fix : " << sInFileName;
-		m_rFeedBackInterface.addLogMessage(Log::LOG_INFO, ss.str());
-	
-		// Process the original mp3
-		FileBuffer inFile(sInFileName);
+		m_rFeedBackInterface.addLogMessage(Log::LOG_INFO, "Starting Fix");
+
+		FileBuffer inFile(std::move(pSource));
+
 		m_ProgressDetails.SetState(FixState::READING);
 		Mp3Reader mp3Reader(inFile, m_rFeedBackInterface, m_ProgressDetails, m_rFixerSettings);
 		mp3Reader.ReadMp3();
@@ -164,22 +160,25 @@ void VbrFixer::Fix( const std::string & sInFileName, const std::string & sOutFil
 		m_ProgressDetails.SetState(FixState::PROCESSING);
 
 		const Mp3Reader::ConstMp3ObjectList& OriginalMp3Objects = mp3Reader.GetMp3Objects();
-		Mp3Reader::ConstMp3ObjectList Mp3Objects = OriginalMp3Objects;
+
+		std::vector<const Mp3Object*> Mp3Objects(OriginalMp3Objects.begin(), OriginalMp3Objects.end());
 
 		ConsistencyChecker consistencyChecker;
 
-		consistencyChecker.workOn(Mp3Objects, m_rFixerSettings.removeInconsistentFrames(), m_rFeedBackInterface);
+		Mp3Reader::ConstMp3ObjectList Mp3ObjectsList = OriginalMp3Objects;
+
+		consistencyChecker.workOn(Mp3ObjectsList, m_rFixerSettings.removeInconsistentFrames(), m_rFeedBackInterface);
 
 		m_ProgressDetails.setPercentOfProcessing(20);
 		m_rFeedBackInterface.update();
 
 		// Check if we should Skip this Mp3
-		if(ShouldSkipMp3(Mp3Objects))
+		if(ShouldSkipMp3(Mp3ObjectsList))
 		{
 			m_ProgressDetails.SetState(FixState::SKIPPED);
 			return;
 		}
-	
+
 		if(m_rFeedBackInterface.HasUserCancelled())
 		{
 			m_ProgressDetails.SetState(FixState::CANCELLED);
@@ -188,27 +187,25 @@ void VbrFixer::Fix( const std::string & sInFileName, const std::string & sOutFil
 
 		m_ProgressDetails.setPercentOfProcessing(40);
 		m_rFeedBackInterface.update();
-	
+
 		// remove unwanted objects
 		if(!m_rFixerSettings.GetRemovingDataTypes().empty())
 		{
-			Mp3Objects.erase(std::remove_if(
-				Mp3Objects.begin(),
-				Mp3Objects.end(),
+			Mp3ObjectsList.erase(std::remove_if(
+				Mp3ObjectsList.begin(),
+				Mp3ObjectsList.end(),
 				IsOfMp3ObjectType(m_rFixerSettings.GetRemovingDataTypes())
-			), Mp3Objects.end());
+			), Mp3ObjectsList.end());
 		}
 
-		// if there is just a lyrics tag and no ide3v1 tag then give an error
+		// check lyrics tag
 		{
-			Mp3ObjectType::Set objTypes; // get all of the remaining object types
-			std::transform(Mp3Objects.begin(), Mp3Objects.end(),
-			std::inserter(objTypes, objTypes.end()), [](const Mp3Object* obj){ return obj->GetObjectType(); });
+			Mp3ObjectType::Set objTypes;
+			std::ranges::transform(Mp3ObjectsList,
+			                       std::inserter(objTypes, objTypes.end()), [](const Mp3Object* obj){ return obj->GetObjectType(); });
 
-			assert(!objTypes.empty());
-			
-			if((objTypes.count(Mp3ObjectType::LYRICS_TAG) != 0) 
-				&& (objTypes.count(Mp3ObjectType::ID3V1_TAG) == 0))
+			if(objTypes.contains(Mp3ObjectType::LYRICS_TAG)
+				&& !objTypes.contains(Mp3ObjectType::ID3V1_TAG))
 			{
 				throw "Resultant mp3 has a Lyrics3 tag but no Id3v1 tag. Please add an Id3v1 tag or choose to remove the Lyrics tag";
 			}
@@ -216,25 +213,23 @@ void VbrFixer::Fix( const std::string & sInFileName, const std::string & sOutFil
 
 		m_ProgressDetails.setPercentOfProcessing(60);
 		m_rFeedBackInterface.update();
-	
+
 		if(m_rFeedBackInterface.HasUserCancelled())
 		{
 			m_ProgressDetails.SetState(FixState::CANCELLED);
 			return;
 		}
-	
+
 		// insert a vbr header object if needed before the 1st frame
 		std::unique_ptr<XingFrame> xingFrame;
 		if(m_ProgressDetails.IsVbr())
 		{
-			auto firstFrame = std::find_if(Mp3Objects.begin(), Mp3Objects.end(), IsOfMp3ObjectType(Mp3ObjectType::GetFrameTypes()));
-			assert(firstFrame != Mp3Objects.end()); // as it is vbr there must be a first frame
+			auto firstFrame = std::find_if(Mp3ObjectsList.begin(), Mp3ObjectsList.end(), IsOfMp3ObjectType(Mp3ObjectType::GetFrameTypes()));
+			assert(firstFrame != Mp3ObjectsList.end());
 			xingFrame = std::make_unique<XingFrame>(consistencyChecker.mostPopularFrameHeader);
-			Mp3Objects.insert(firstFrame, xingFrame.get());
+			Mp3ObjectsList.insert(firstFrame, xingFrame.get());
 		}
-	
-		// TODO order the objects
-	
+
 		if(m_rFeedBackInterface.HasUserCancelled())
 		{
 			m_ProgressDetails.SetState(FixState::CANCELLED);
@@ -243,14 +238,9 @@ void VbrFixer::Fix( const std::string & sInFileName, const std::string & sOutFil
 
 		m_ProgressDetails.setPercentOfProcessing(100);
 		m_rFeedBackInterface.update();
-	
-		// Create a new mp3
-		inFile.reopen(); // we have to reopen the file as it reached the end and can't continue to be used
-		std::ofstream outFile;
-		outFile.open(sOutFileName.c_str(), std::ios::out | std::ios::binary);
-	
-		// Fill the Xing Frame once we know the file positions will not change again
-		// This must occur dicectly before writing the Mp3
+
+		inFile.reset();
+
 		if(xingFrame)
 		{
 			const XingFrame * pOriginalFrame = nullptr;
@@ -270,8 +260,8 @@ void VbrFixer::Fix( const std::string & sInFileName, const std::string & sOutFil
 					pOriginalFrame = dynamic_cast<const XingFrame* >(*xingFrameIter);
 				}
 			}
-			
-			xingFrame->Setup(Mp3Objects, pOriginalFrame, m_rFixerSettings, inFile);
+
+			xingFrame->Setup(Mp3ObjectsList, pOriginalFrame, m_rFixerSettings, inFile);
 			if(pOriginalFrame && m_rFixerSettings.skipIfXingTagLooksGood())
 			{
 				if(xingFrame->isOriginalCorrect(pOriginalFrame))
@@ -284,21 +274,21 @@ void VbrFixer::Fix( const std::string & sInFileName, const std::string & sOutFil
 		}
 
 		m_ProgressDetails.SetState(FixState::WRITING);
-	
-		// write the objects to the new file
 		unsigned long iFileSizeTotal = 0;
 		unsigned long iStreamSize = 0;
-		int iObjectsWritten = 0; const int iTotalObjects = Mp3Objects.size();
-		for(auto & Mp3Object : Mp3Objects)
+		int iObjectsWritten = 0;
+		const size_t iTotalObjects = Mp3ObjectsList.size();
+
+		for(auto & Mp3Object : Mp3ObjectsList)
 		{
-			Mp3Object->writeToFile(inFile, outFile);
+			Mp3Object->write(inFile, output);
 			iFileSizeTotal += Mp3Object->size();
 
 			if(Mp3Object->GetObjectType().IsTypeOfFrame())
 			{
-				iStreamSize += Mp3Object->size(); // also count size of stream
+				iStreamSize += Mp3Object->size();
 			}
-			
+
 			if(m_rFeedBackInterface.HasUserCancelled())
 			{
 				m_ProgressDetails.SetState(FixState::CANCELLED);
@@ -307,19 +297,17 @@ void VbrFixer::Fix( const std::string & sInFileName, const std::string & sOutFil
 			m_ProgressDetails.setPercentOfWriting( ++iObjectsWritten / iTotalObjects );
 			m_rFeedBackInterface.update();
 		}
-	
+
 		if(m_rFeedBackInterface.HasUserCancelled())
 		{
 			m_ProgressDetails.SetState(FixState::CANCELLED);
 			return;
 		}
 
-		ss.str("");
+		std::stringstream ss;
 		ss << "New File Size = " << iFileSizeTotal << ", Audio Stream Size = " << iStreamSize;
 		m_rFeedBackInterface.addLogMessage(Log::LOG_INFO, ss.str());
-		
-		outFile.close();
-	
+
 		m_rFeedBackInterface.addLogMessage(Log::LOG_INFO, "Finished Fix");
 		m_ProgressDetails.SetState(FixState::FIXED);
 		m_ProgressDetails.setPercentOfWriting(100);
@@ -334,6 +322,11 @@ void VbrFixer::Fix( const std::string & sInFileName, const std::string & sOutFil
 	{
 		m_ProgressDetails.SetState(FixState::ERROR);
 		m_rFeedBackInterface.addLogMessage( Log::LOG_ERROR, s);
+	}
+	catch(std::exception& e)
+	{
+		m_ProgressDetails.SetState(FixState::ERROR);
+		m_rFeedBackInterface.addLogMessage( Log::LOG_ERROR, std::string("Error: ") + e.what());
 	}
 	catch(...)
 	{

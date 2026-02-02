@@ -19,8 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#ifndef READSETTINGS_H
-#define READSETTINGS_H
+#ifndef READSETTINGS_HPP
+#define READSETTINGS_HPP
 
 class ReadSettings
 {

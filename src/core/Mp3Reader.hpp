@@ -19,16 +19,16 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#ifndef MP3READER_H
-#define MP3READER_H
+#ifndef MP3READER_HPP
+#define MP3READER_HPP
 
-#include "Mp3FileObject.h"
+#include "Mp3FileObject.hpp"
 
 #include <list>
 #include <istream>
 #include <vector>
 #include <set>
-#include "Mp3Header.h"
+#include "Mp3Header.hpp"
 
 class FileBuffer; class Mp3ObjectCheckerInterface; class FeedBackInterface; class ReadSettings;
 

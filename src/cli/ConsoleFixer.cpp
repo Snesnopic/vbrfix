@@ -19,11 +19,16 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#include "ConsoleFixer.h"
-#include "VbrFixer.h"
-#include "FixerSettings.h"
+#include "ConsoleFixer.hpp"
+#include "VbrFixer.hpp"
+#include "FixerSettings.hpp"
+#include "CommandReader.hpp"
+#include "FileDataSource.hpp" // Necessario per creare la sorgente dati
+
 #include <iostream>
-#include "CommandReader.h"
+#include <fstream>          // Necessario per l'output stream
+#include <memory>
+#include <stdexcept>
 
 namespace
 {
@@ -56,10 +61,35 @@ bool ConsoleFixer::Run( )
 		const std::string& outFile = cmdReader.GetParameterList().back();
 
 		std::cout << "Fixing " << inFile << "->" << outFile << std::endl;
-		fixer.Fix(inFile, outFile);
-		std::cout << "Finished Fixing" << std::endl;
-	} 
-	else 
+
+		try
+		{
+			// 1. Preparazione Input (RAII)
+			// FileDataSource lancia std::runtime_error se il file non può essere aperto
+			auto source = std::make_unique<FileDataSource>(inFile);
+
+			// 2. Preparazione Output
+			std::ofstream outStream(outFile, std::ios::out | std::ios::binary);
+			if (!outStream.is_open())
+			{
+				std::cerr << "Error: Could not open output file '" << outFile << "' for writing." << std::endl;
+				return false;
+			}
+
+			// 3. Esecuzione Fix
+			// Passiamo la ownership della sorgente e il riferimento allo stream di output
+			fixer.Fix(std::move(source), outStream);
+
+			std::cout << "Finished Fixing" << std::endl;
+		}
+		catch (const std::exception& e)
+		{
+			// Catturiamo errori di apertura file o altri errori runtime non gestiti internamente da Fixer
+			std::cerr << "Fatal Error: " << e.what() << std::endl;
+			return false;
+		}
+	}
+	else
 	{
 		std::cout << "Usage :" << std::endl;
 		std::cout << "./vbrfix [--option] [--option] in.mp3 out.mp3" << std::endl;

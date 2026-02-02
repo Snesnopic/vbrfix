@@ -19,13 +19,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#include "Mp3Frame.h"
-#include "FileBuffer.h"
-#include "Mp3Header.h"
-#include "FeedBackInterface.h"
-#include "ReadSettings.h"
-#include "XingFrame.h"
-#include "VbriFrame.h"
+#include "Mp3Frame.hpp"
+#include "FileBuffer.hpp"
+#include "Mp3Header.hpp"
+#include "FeedBackInterface.hpp"
+#include "ReadSettings.hpp"
+#include "XingFrame.hpp"
+#include "VbriFrame.hpp"
 #include <cassert>
 
 Mp3Frame * Mp3Frame::Check(CheckParameters & rParams)
@@ -64,13 +64,13 @@ Mp3Frame * Mp3Frame::Check(CheckParameters & rParams)
 	return nullptr;
 }
 
-Mp3Frame::Mp3Frame(unsigned long oldFilePosition, const Mp3Header &header)
+Mp3Frame::Mp3Frame(const unsigned long oldFilePosition, const Mp3Header &header)
 	: Mp3Object(oldFilePosition)
 	, m_Header(header)
 {
 }
 
-Mp3Frame::Mp3Frame( const Mp3Header & header )
+Mp3Frame::Mp3Frame(const Mp3Header & header)
 	: m_Header(header)
 {
 }
@@ -78,17 +78,17 @@ Mp3Frame::Mp3Frame( const Mp3Header & header )
 
 Mp3Frame::~Mp3Frame() = default;
 
-unsigned long Mp3Frame::size( ) const
+unsigned long Mp3Frame::size() const
 {
 	return m_Header.GetFrameSize();
 }
 
-const Mp3Header & Mp3Frame::GetMp3Header( ) const
+const Mp3Header & Mp3Frame::GetMp3Header() const
 {
  	return m_Header;
 }
 
-Mp3Header & Mp3Frame::GetMp3Header( )
+Mp3Header & Mp3Frame::GetMp3Header()
 {
 	return m_Header;
 }

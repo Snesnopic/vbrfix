@@ -1,5 +1,5 @@
 /*//////////////////////////////////////////////////////////////////////////////////
-// copyright : (C) 2006  by William Pye
+// copyright : (C) 2009  by William Pye
 // contact   : www.willwap.co.uk
 ///////////////////////////////////////////////////////////////////////////////////
 //
@@ -19,33 +19,24 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#ifndef FRAMEOBJECTCHECKER_H
-#define FRAMEOBJECTCHECKER_H
+#ifndef LYRICSTAG_HPP
+#define LYRICSTAG_HPP
 
-#include "Mp3FileObjectChecker.h"
+#include "Mp3FileObject.hpp"
 
-class FrameObjectChecker : public Mp3FileObjectChecker
+class Lyrics3Tag : public Mp3Object
 {
 	public:
-		FrameObjectChecker();
+		~Lyrics3Tag() override;
+		static Lyrics3Tag* Check(const CheckParameters & rParams);
 
-		virtual ~FrameObjectChecker();
-
-		Mp3FileObject* Check(FileBuffer & mp3FileBuffer) const;
-		
+		[[nodiscard]] unsigned long size() const override;
+		[[nodiscard]] Mp3ObjectType GetObjectType() const override {return Mp3ObjectType(Mp3ObjectType::LYRICS_TAG);}
 	protected:
-		class FrameObject : public Mp3FileObject
-		{
-			const unsigned int FrameHeaderBits = 32;
-			public:
-				enum MpegVersion { MPEG_1, MPEG_2, MPEG_2p5};
-				FrameObject(const std::bitset<FrameHeaderBits> & header);
+		Lyrics3Tag(unsigned long oldFilePosition, unsigned long Size);
 
-				bool IsValid() const {return m_bValid;}
-			private:
-				bool m_bValid;
-		};
-
+	private:
+		const unsigned long m_Size;
 };
 
 #endif

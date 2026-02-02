@@ -19,9 +19,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#include "FixerSettings.h"
+#include "FixerSettings.hpp"
 
-FixerSettings::FixerSettings( )
+FixerSettings::FixerSettings()
 	: m_AlwaysSkip(false)
 	  , m_MinPercentUnderstood(99)
 	  , m_bLogDetail(true)
@@ -35,17 +35,17 @@ FixerSettings::FixerSettings( )
 	m_RemoveTypes.insert(Mp3ObjectType::VBRI_FRAME);
 }
 
-void FixerSettings::Defaults( )
+void FixerSettings::Defaults()
 {
 	*this = FixerSettings();
 }
 
-bool FixerSettings::RemoveType(Mp3ObjectType eType ) const
+bool FixerSettings::RemoveType(const Mp3ObjectType eType) const
 {
-	return (m_RemoveTypes.find(eType) != m_RemoveTypes.end());
+	return (m_RemoveTypes.contains(eType));
 }
 
-void FixerSettings::SetRemoveType( Mp3ObjectType eType, bool bMarkForRemoval )
+void FixerSettings::SetRemoveType(const Mp3ObjectType eType, const bool bMarkForRemoval)
 {
 	if(bMarkForRemoval)
 	{
@@ -57,27 +57,27 @@ void FixerSettings::SetRemoveType( Mp3ObjectType eType, bool bMarkForRemoval )
 	}
 }
 
-const Mp3ObjectType::Set & FixerSettings::GetRemovingDataTypes( ) const
+const Mp3ObjectType::Set & FixerSettings::GetRemovingDataTypes() const
 {
 	return m_RemoveTypes;
 }
 
-bool FixerSettings::AlwaysSkip( ) const
+bool FixerSettings::AlwaysSkip() const
 {
 	return m_AlwaysSkip;
 }
 
-void FixerSettings::SetAlwaysSkip( bool bAlwaysSkip )
+void FixerSettings::SetAlwaysSkip(const bool bAlwaysSkip)
 {
 	m_AlwaysSkip = bAlwaysSkip;
 }
 
-int FixerSettings::MinimumPercentUnderStood( ) const
+int FixerSettings::MinimumPercentUnderStood() const
 {
 	return m_MinPercentUnderstood;
 }
 
-void FixerSettings::SetMinimumPercentUnderStood( int iMinPercentUnderStood )
+void FixerSettings::SetMinimumPercentUnderStood(const int iMinPercentUnderStood )
 {
 	m_MinPercentUnderstood = iMinPercentUnderStood;
 }

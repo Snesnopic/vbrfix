@@ -19,24 +19,30 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////*/
 
-#ifndef APETAG_H
-#define APETAG_H
+#ifndef COMMANDREADER_HPP
+#define COMMANDREADER_HPP
 
-#include "Mp3FileObject.h"
+#include <list>
+#include <string>
 
-class ApeTag : public Mp3Object
+class CommandReader
 {
 	public:
-		~ApeTag() override;
-		static ApeTag* Check(const CheckParameters & rParams);
+		typedef std::list < std::string > OptionList;
+		typedef std::list < std::string > ParameterList;
+		typedef std::list < std::string > ArgList;
+		explicit CommandReader(const ArgList& originalargs);
 
-		[[nodiscard]] unsigned long size() const override;
-		[[nodiscard]] Mp3ObjectType GetObjectType() const override {return Mp3ObjectType(Mp3ObjectType::APE_TAG);}
-	protected:
-		ApeTag(unsigned long oldFilePosition, unsigned long Size);
+		virtual ~CommandReader();
+
+		[[nodiscard]] const OptionList& GetOptionList() const {return m_Options;}
+		[[nodiscard]] const ParameterList& GetParameterList() const {return m_Parameters;}
 
 	private:
-		const unsigned long m_Size;
+		ParameterList m_Parameters;
+		OptionList m_Options;
+		void ProcessArg(const std::string & arg);
+
 };
 
 #endif
