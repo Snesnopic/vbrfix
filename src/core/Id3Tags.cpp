@@ -57,8 +57,8 @@ Id3v2Tag * Id3v2Tag::Check(const CheckParameters& rParams)
 {
 	const FileBuffer& mp3FileBuffer(rParams.m_mp3FileBuffer);
 
-	constexpr std::string sTagIdentifier = "ID3";
-	const unsigned long headerBytesMustBeLessThan[] =
+	constexpr std::string_view sTagIdentifier = "ID3";
+	constexpr unsigned long headerBytesMustBeLessThan[] =
 	{
 		static_cast<unsigned long>(sTagIdentifier[0] + 1),
 		static_cast<unsigned long>(sTagIdentifier[1] + 1),
