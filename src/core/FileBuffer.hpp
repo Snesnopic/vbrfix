@@ -52,7 +52,7 @@ public:
 	bool setPosition(const pos_type &iPos) const;
 	bool readIntoBuffer(unsigned char * pBuffer, off_type iSize) const;
 
-	bool DoesSay(const std::string& sText, off_type iStartingfromByte = 0) const;
+	bool DoesSay(const std::string_view& sText, off_type iStartingfromByte = 0) const;
 
 	bool isDataLeft() const;
 

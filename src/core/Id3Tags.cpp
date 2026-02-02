@@ -37,7 +37,7 @@ Id3v1Tag * Id3v1Tag::Check(const CheckParameters& rParams)
 	const FileBuffer& mp3FileBuffer(rParams.m_mp3FileBuffer);
 	
 	// TODO "TAG+"
-	constexpr std::string sTagIdentifier = "TAG";
+	constexpr std::string_view sTagIdentifier = "TAG";
 	if(mp3FileBuffer.CanRead(sTagIdentifier.size()))
 	{
 		if(mp3FileBuffer.DoesSay(sTagIdentifier))

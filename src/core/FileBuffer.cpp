@@ -111,7 +111,7 @@ bool FileBuffer::CanRead(const off_type iCount ) const
 	return (m_source->length() >= (position() + iCount));
 }
 
-bool FileBuffer::DoesSay(const std::string& sText, const off_type iStartingfromByte) const
+bool FileBuffer::DoesSay(const std::string_view& sText, const off_type iStartingfromByte) const
 {
 	assert(!sText.empty());
 	if(!CanRead(iStartingfromByte + sText.size()))
