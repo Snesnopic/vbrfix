@@ -88,12 +88,11 @@ bool ConsoleFixer::Run( )
 		std::cout << "Fixing " << inFile << "->" << outFile << std::endl;
 		fixer.Fix(inFile, outFile);
 		std::cout << "Finished Fixing" << std::endl;
+		return fixer.GetProgressDetails().GetState() != FixState::ERROR;
 	}
-	else
-	{
-		print_usage();
-	}
-	return true;
+
+	print_usage();
+	return false;
 }
 
 bool ConsoleFixer::GetFixerSettingsFromOptions(FixerSettings &settings,

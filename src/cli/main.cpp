@@ -30,6 +30,5 @@ int main(const int argc, const char** argv)
 		args.emplace_back(argv[i]);
 	}
 	ConsoleFixer app(args);
-	app.Run();
-	return EXIT_SUCCESS;
+	return app.Run() ? EXIT_SUCCESS : EXIT_FAILURE;
 }
