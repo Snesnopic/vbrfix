@@ -20,6 +20,7 @@
 ///////////////////////////////////////////////////////////////////////////////////*/
 
 #include "ConsoleFixer.h"
+#include <cstdlib>
 
 int main(const int argc, const char** argv)
 {
@@ -30,5 +31,5 @@ int main(const int argc, const char** argv)
 	}
 	ConsoleFixer app(args);
 	app.Run();
-	return 0;
+	return EXIT_SUCCESS;
 }

@@ -22,12 +22,28 @@
 #include "ConsoleFixer.h"
 #include "VbrFixer.h"
 #include "FixerSettings.h"
+#include <algorithm>
 #include <iostream>
 #include "CommandReader.h"
 
 namespace
 {
 	std::string gConsoleVersionString = "-0";
+
+	void print_usage()
+	{
+		std::cout << "Usage :" << std::endl;
+		std::cout << "./vbrfix [--option] [--option] in.mp3 out.mp3" << std::endl;
+		std::cout <<
+			"options (case sensitive):" << std::endl <<
+			"--removeId3v1" << std::endl <<
+			"--removeId3v2" << std::endl <<
+			"--removeUnknown" << std::endl <<
+			"--removeLame" << std::endl <<
+			"--keepLame" << std::endl <<
+			"--keepLameUpdateCrc" << std::endl <<
+			"--XingFrameCrcProtectIfCan" << std::endl;
+	}
 }
 
 ConsoleFixer::~ConsoleFixer() = default;
@@ -46,9 +62,23 @@ bool ConsoleFixer::Run( )
 {
 	const std::string ConsoleVersion = VbrFixer::GetFixerVersion() + gConsoleVersionString;
 	std::cout << "Vbrfix Console version " << ConsoleVersion << std::endl;
+
+	CommandReader cmdReader(m_Args);
+	const CommandReader::OptionList& options = cmdReader.GetOptionList();
+
+	if (std::find(options.begin(), options.end(), "version") != options.end())
+	{
+		return true;
+	}
+	if (std::find(options.begin(), options.end(), "help") != options.end() ||
+	    std::find(options.begin(), options.end(), "h") != options.end())
+	{
+		print_usage();
+		return true;
+	}
+
 	FixerSettings settings;
 	VbrFixer fixer(*this, settings);
-	CommandReader cmdReader(m_Args);
 	if ((cmdReader.GetParameterList().size() == 2) &&
 	    GetFixerSettingsFromOptions(settings, cmdReader.GetOptionList()))
 	{
@@ -58,20 +88,10 @@ bool ConsoleFixer::Run( )
 		std::cout << "Fixing " << inFile << "->" << outFile << std::endl;
 		fixer.Fix(inFile, outFile);
 		std::cout << "Finished Fixing" << std::endl;
-	} 
-	else 
+	}
+	else
 	{
-		std::cout << "Usage :" << std::endl;
-		std::cout << "./vbrfix [--option] [--option] in.mp3 out.mp3" << std::endl;
-		std::cout <<
-			"options (case sensitive):" << std::endl <<
-			"--removeId3v1" << std::endl <<
-			"--removeId3v2" << std::endl <<
-			"--removeUnknown" << std::endl <<
-			"--removeLame" << std::endl <<
-			"--keepLame" << std::endl <<
-			"--keepLameUpdateCrc" << std::endl <<
-			"--XingFrameCrcProtectIfCan" << std::endl;
+		print_usage();
 	}
 	return true;
 }
