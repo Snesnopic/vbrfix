@@ -28,11 +28,14 @@
 #include "FixerSettings.h"
 #include "XingFrame.h"
 #include <fstream>
+#include <filesystem>
+#include <system_error>
 #include <memory>
 #include <sstream>
 #include <cassert>
 #include <algorithm>
 #include <map>
+#include <cstdio>
 
 namespace
 {
@@ -148,8 +151,16 @@ struct ConsistencyChecker
 
 void VbrFixer::Fix( const std::string & sInFileName, const std::string & sOutFileName )
 {
+	bool bOutputCreated = false;
 	try
 	{
+		{
+			std::error_code ec;
+			if(std::filesystem::exists(sOutFileName, ec) && std::filesystem::equivalent(sInFileName, sOutFileName, ec))
+			{
+				throw "Input and output are the same file, choose a different output file";
+			}
+		}
 		std::stringstream ss;
 		ss << "Starting Fix : " << sInFileName;
 		m_rFeedBackInterface.addLogMessage(Log::LOG_INFO, ss.str());
@@ -247,7 +258,6 @@ void VbrFixer::Fix( const std::string & sInFileName, const std::string & sOutFil
 		// Create a new mp3
 		inFile.reopen(); // we have to reopen the file as it reached the end and can't continue to be used
 		std::ofstream outFile;
-		outFile.open(sOutFileName.c_str(), std::ios::out | std::ios::binary);
 	
 		// Fill the Xing Frame once we know the file positions will not change again
 		// This must occur dicectly before writing the Mp3
@@ -282,6 +292,13 @@ void VbrFixer::Fix( const std::string & sInFileName, const std::string & sOutFil
 				}
 			}
 		}
+
+		outFile.open(sOutFileName.c_str(), std::ios::out | std::ios::binary);
+		if(!outFile)
+		{
+			throw "Cannot open the output file for writing";
+		}
+		bOutputCreated = true;
 
 		m_ProgressDetails.SetState(FixState::WRITING);
 	
@@ -319,6 +336,10 @@ void VbrFixer::Fix( const std::string & sInFileName, const std::string & sOutFil
 		m_rFeedBackInterface.addLogMessage(Log::LOG_INFO, ss.str());
 		
 		outFile.close();
+		if(!outFile)
+		{
+			throw "Error writing the output file";
+		}
 	
 		m_rFeedBackInterface.addLogMessage(Log::LOG_INFO, "Finished Fix");
 		m_ProgressDetails.SetState(FixState::FIXED);
@@ -328,16 +349,19 @@ void VbrFixer::Fix( const std::string & sInFileName, const std::string & sOutFil
 	catch(const char* pMsg)
 	{
 		m_ProgressDetails.SetState(FixState::ERROR);
+		if(bOutputCreated) std::remove(sOutFileName.c_str());
 		m_rFeedBackInterface.addLogMessage( Log::LOG_ERROR, pMsg);
 	}
 	catch(std::string& s)
 	{
 		m_ProgressDetails.SetState(FixState::ERROR);
+		if(bOutputCreated) std::remove(sOutFileName.c_str());
 		m_rFeedBackInterface.addLogMessage( Log::LOG_ERROR, s);
 	}
 	catch(...)
 	{
 		m_ProgressDetails.SetState(FixState::ERROR);
+		if(bOutputCreated) std::remove(sOutFileName.c_str());
 		m_rFeedBackInterface.addLogMessage( Log::LOG_ERROR, "Unknown Error fixing mp3");
 	}
 }
