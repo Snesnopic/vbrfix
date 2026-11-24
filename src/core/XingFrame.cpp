@@ -411,7 +411,7 @@ XingFrame * XingFrame::Check(CheckParameters & rParams)
 
 			pNewFrame->SetLameData(lameInfo);
 		}
-		int iQualPos = iXingHeaderPos + XingIdentifier.size() + sizeof(uXingFlags);
+		int iQualPos = iXingHeaderPos + XingIdentifier.size() + HEADER_BYTES;
 		if(uXingFlags & FRAMES_FLAG) 
 		{
 			pNewFrame->m_FrameCount = mp3FileBuffer.GetFromBigEndianToNative(iQualPos);
