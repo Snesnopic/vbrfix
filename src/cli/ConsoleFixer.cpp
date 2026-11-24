@@ -102,7 +102,7 @@ bool ConsoleFixer::GetFixerSettingsFromOptions(FixerSettings &settings,
 	     iter != optionList.end(); ++iter)
 	{
 		const std::string & option = *iter;
-		if (option == "removedId3v1")
+		if (option == "removeId3v1")
 		{
 			settings.SetRemoveType(Mp3ObjectType::ID3V1_TAG, true);
 			std::cout << "Remove Id3v1 on" << std::endl;
@@ -142,6 +142,11 @@ bool ConsoleFixer::GetFixerSettingsFromOptions(FixerSettings &settings,
 			std::cout << "Option <" << option << "> not understood" << std::endl;
 			return false;
 		}
+	}
+	if (!optionList.empty())
+	{
+		// every option changes the output, so a good looking Xing frame must not make the run a no-op
+		settings.setSkipIfXingTagLooksGood(false);
 	}
 	return true;
 }

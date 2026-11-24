@@ -20,7 +20,6 @@
 ///////////////////////////////////////////////////////////////////////////////////*/
 
 #include "CommandReader.h"
-#include <cassert>
 
 namespace
 {
@@ -50,26 +49,16 @@ CommandReader::~CommandReader() = default;
 
 void CommandReader::ProcessArg( const std::string & arg )
 {
-	if(!arg.empty())
+	if(arg.substr(0, 2) == "--")
 	{
-		if(arg.substr(0, 2) == "--")
-		{
-			m_Options.push_back(arg.substr(2));
-		}
-		else if(arg[0] == '-')
-		{
-			m_Options.push_back(arg.substr(1));
-		}
-		else
-		{
-			m_Parameters.push_back(arg);
-		}
+		m_Options.push_back(arg.substr(2));
+	}
+	else if(!arg.empty() && arg[0] == '-')
+	{
+		m_Options.push_back(arg.substr(1));
 	}
 	else
 	{
-		assert(0);
-		throw ("Unexpected Error");
+		m_Parameters.push_back(arg);
 	}
 }
-
-
